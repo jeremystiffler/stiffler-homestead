@@ -12,7 +12,7 @@ const siteUrl = SITE_CONFIG.siteUrl;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: "Stiffler Homestead", template: `%s | Stiffler Homestead` },
-  description: "Family, faith, animals, simple systems, and practical homesteading projects from the Stiffler family.",
+  description: "Local homestead meat and eggs, family projects, YouTube field notes, and practical homesteading resources from the Stiffler family.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Stiffler Homestead",
@@ -35,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span>Stiffler Homestead</span>
             </Link>
             <div className="flex items-center gap-5 text-sm font-semibold text-gray-700">
+              <Link href="/products">Meat & Eggs</Link>
               <Link href="/#videos">Videos</Link>
               <Link href="/#newsletter">Subscribe</Link>
               <Link href="/blog">Blog</Link>

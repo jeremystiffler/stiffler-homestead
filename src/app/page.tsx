@@ -1,11 +1,14 @@
 import Link from "next/link";
 import EmailSignup from "@/components/EmailSignup";
+import ProductOrderCard from "@/components/ProductOrderCard";
 import { getAllPosts } from "@/lib/posts";
+import { getFeaturedProducts } from "@/lib/products";
 import { SITE_CONFIG } from "@/lib/config";
 
 export default function HomePage() {
   const posts = getAllPosts();
   const featured = posts.slice(0, 6);
+  const products = getFeaturedProducts();
 
   return (
     <div>
@@ -15,13 +18,16 @@ export default function HomePage() {
           <div>
             <p className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.2em] text-[#2f7d4b] shadow-sm">Family homestead • Lexington, KY</p>
             <h1 className="mt-6 text-5xl font-black leading-[0.95] text-[#183b25] md:text-7xl">
-              Practical homesteading with kids, animals, and real life still happening.
+              Local homestead food, family-tested projects, and field notes from the Stiffler place.
             </h1>
             <p className="mt-6 max-w-2xl text-xl leading-8 text-gray-700">
-              We are learning out loud: chickens, sheep, compost, automation, kids doing meaningful work, and the small systems that make a homestead less frantic.
+              Reserve meat chickens, see future pork/lamb/egg availability, follow the blog from our YouTube videos, and shop the supplies and family-tech tools we actually recommend.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer" className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white shadow-lg shadow-green-900/10 hover:bg-[#27683f]">
+              <Link href="/products" className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white shadow-lg shadow-green-900/10 hover:bg-[#27683f]">
+                Buy local meat & eggs
+              </Link>
+              <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 font-black text-[#2f7d4b] hover:bg-green-50">
                 Watch the videos
               </a>
               <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 font-black text-[#2f7d4b] hover:bg-green-50">
@@ -49,6 +55,22 @@ export default function HomePage() {
               </blockquote>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="products" className="mx-auto max-w-6xl px-4 py-12">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Buy from the homestead</p>
+            <h2 className="mt-2 text-4xl font-black text-[#183b25]">Current meat, eggs, and future availability</h2>
+            <p className="mt-3 max-w-3xl leading-7 text-gray-700">Reserve available batches, ask about the next round, or join the interest list for pork, lamb, eggs, and future honey.</p>
+          </div>
+          <Link href="/products" className="rounded-full bg-amber-300 px-5 py-3 font-black text-[#183b25]">See full availability</Link>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {products.map((product) => (
+            <ProductOrderCard key={product.slug} product={product} />
+          ))}
         </div>
       </section>
 

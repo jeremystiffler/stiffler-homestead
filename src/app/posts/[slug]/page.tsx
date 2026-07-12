@@ -68,10 +68,18 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         </figure>
       )}
       <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-        <strong>Disclosure:</strong> As an Amazon Associate I earn from qualifying purchases. Affiliate links help support the channel at no extra cost to you.
+        <strong>Disclosure:</strong> As an Amazon Associate I earn from qualifying purchases. Some posts also include Wisephone and Covenant Eyes affiliate links. Affiliate links help support the channel at no extra cost to you.
       </div>
       <div className="prose prose-lg max-w-none rounded-3xl bg-white p-6 shadow-lg shadow-green-900/5 md:p-8">
         <MDXRemote source={post.content} />
+      </div>
+      <div className="mt-8 grid gap-4 rounded-3xl bg-[#f7f3ea] p-5 md:grid-cols-2">
+        <a href={SITE_CONFIG.wisephoneDiscountUrl} target="_blank" rel="noreferrer" className="rounded-2xl bg-white p-5 font-bold text-[#183b25] shadow-sm hover:-translate-y-0.5 hover:shadow-md">
+          Wisephone discount link <span className="block pt-2 text-sm font-semibold text-gray-600">A calmer phone option for families trying to keep homestead life less screen-frantic.</span>
+        </a>
+        <a href={SITE_CONFIG.covenantEyesUrl} target="_blank" rel="noreferrer" className="rounded-2xl bg-white p-5 font-bold text-[#183b25] shadow-sm hover:-translate-y-0.5 hover:shadow-md">
+          Covenant Eyes accountability <span className="block pt-2 text-sm font-semibold text-gray-600">A practical tool for digital accountability on devices with broader internet access.</span>
+        </a>
       </div>
       <EmailSignup className="mt-10" heading="Want the next project notes?" subtext="Subscribe and we’ll send the newest Stiffler Homestead guide when it’s ready." />
     </article>
