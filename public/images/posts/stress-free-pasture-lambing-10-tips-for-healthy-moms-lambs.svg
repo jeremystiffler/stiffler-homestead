@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675">
+  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ddf8e8"/><stop offset=".55" stop-color="#f7f3ea"/><stop offset="1" stop-color="#f6c453"/></linearGradient></defs>
+  <rect width="1200" height="675" fill="url(#g)"/>
+  <circle cx="1020" cy="115" r="92" fill="#f6c453" opacity=".9"/>
+  <path d="M0 500 C220 420 350 530 560 455 C760 380 900 450 1200 355 L1200 675 L0 675Z" fill="#2f7d4b" opacity=".85"/>
+  <path d="M145 430 L300 305 L455 430 Z" fill="#183b25"/><rect x="205" y="430" width="190" height="115" fill="#183b25"/><rect x="255" y="455" width="54" height="90" fill="#f6c453"/>
+  <text x="70" y="110" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#2f7d4b">Stiffler Homestead</text>
+  <text x="70" y="185" font-family="Arial, sans-serif" font-size="58" font-weight="900" fill="#183b25">Stress-Free Pasture Lambing: 10 Tips f</text>
+</svg>
