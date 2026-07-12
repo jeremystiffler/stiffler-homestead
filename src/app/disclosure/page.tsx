@@ -2,10 +2,10 @@ export const metadata = { title: "Disclosure" };
 
 export default function DisclosurePage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14">
-      <div className="rounded-3xl bg-white p-8 shadow-lg shadow-green-900/5">
+    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-14">
+      <div className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5 sm:p-8">
         <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Disclosure</p>
-        <h1 className="mt-2 text-4xl font-black text-[#183b25]">Affiliate disclosure</h1>
+        <h1 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">Affiliate disclosure</h1>
         <p className="mt-5 leading-8 text-gray-700">
           Stiffler Homestead participates in the Amazon Associates Program. As an Amazon Associate I earn from qualifying purchases. Some posts include affiliate links to Amazon, Wisephone, Covenant Eyes, or other partner resources. Those links may earn a commission at no extra cost to you.
         </p>

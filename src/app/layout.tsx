@@ -29,12 +29,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={inter.className}>
         <nav className="sticky top-0 z-50 border-b border-green-900/10 bg-[#fffaf0]/90 shadow-sm backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-            <Link href="/" className="flex items-center gap-2 font-black text-[#183b25]">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-amber-300">SH</span>
-              <span>Stiffler Homestead</span>
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <Link href="/" className="flex min-w-0 items-center gap-2 font-black text-[#183b25]">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-300">SH</span>
+              <span className="truncate text-sm sm:text-base">Stiffler Homestead</span>
             </Link>
-            <div className="flex items-center gap-5 text-sm font-semibold text-gray-700">
+            <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-gray-700 sm:w-auto sm:justify-end sm:text-sm md:gap-5">
               <Link href="/products">Meat & Eggs</Link>
               <Link href="/#videos">Videos</Link>
               <Link href="/#newsletter">Subscribe</Link>

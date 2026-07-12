@@ -14,28 +14,28 @@ export default function HomePage() {
     <div>
       <section className="relative overflow-hidden bg-[#f7f3ea]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#d9f99d55,transparent_35%),radial-gradient(circle_at_80%_20%,#f6c45366,transparent_28%)]" />
-        <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-[1.05fr_.95fr] md:items-center md:py-24">
+        <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:py-14 md:grid-cols-[1.05fr_.95fr] md:items-center md:py-24">
           <div>
-            <p className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.2em] text-[#2f7d4b] shadow-sm">Family homestead • Lexington, KY</p>
-            <h1 className="mt-6 text-5xl font-black leading-[0.95] text-[#183b25] md:text-7xl">
+            <p className="inline-flex rounded-full bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#2f7d4b] shadow-sm sm:px-4 sm:text-sm sm:tracking-[0.2em]">Family homestead • Lexington, KY</p>
+            <h1 className="mt-5 text-4xl font-black leading-[0.98] text-[#183b25] sm:text-5xl md:text-7xl">
               Local homestead food, family-tested projects, and field notes from the Stiffler place.
             </h1>
-            <p className="mt-6 max-w-2xl text-xl leading-8 text-gray-700">
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-700 sm:text-xl">
               Reserve meat chickens, see future pork/lamb/egg availability, follow the blog from our YouTube videos, and shop the supplies and family-tech tools we actually recommend.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/products" className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white shadow-lg shadow-green-900/10 hover:bg-[#27683f]">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link href="/products" className="rounded-full bg-[#2f7d4b] px-6 py-3 text-center font-black text-white shadow-lg shadow-green-900/10 hover:bg-[#27683f]">
                 Buy local meat & eggs
               </Link>
-              <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 font-black text-[#2f7d4b] hover:bg-green-50">
+              <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
                 Watch the videos
               </a>
-              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 font-black text-[#2f7d4b] hover:bg-green-50">
+              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
                 Shop the supply guide
               </a>
             </div>
           </div>
-          <div className="rounded-[2rem] bg-white p-4 shadow-2xl shadow-green-900/10 rotate-1">
+          <div className="rounded-[2rem] bg-white p-3 shadow-2xl shadow-green-900/10 sm:p-4 md:rotate-1">
             <div className="rounded-[1.5rem] bg-[#ddf8e8] p-6">
               <div className="grid grid-cols-2 gap-3 text-center">
                 {[
@@ -44,8 +44,8 @@ export default function HomePage() {
                   ["9", "starter guides"],
                   ["100%", "family-tested"],
                 ].map(([big, small]) => (
-                  <div key={big} className="rounded-2xl bg-white p-5 shadow-sm">
-                    <p className="text-3xl font-black text-[#183b25]">{big}</p>
+                  <div key={big} className="rounded-2xl bg-white p-4 shadow-sm sm:p-5">
+                    <p className="text-2xl font-black text-[#183b25] sm:text-3xl">{big}</p>
                     <p className="mt-1 text-sm font-semibold text-gray-600">{small}</p>
                   </div>
                 ))}
@@ -62,10 +62,10 @@ export default function HomePage() {
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Buy from the homestead</p>
-            <h2 className="mt-2 text-4xl font-black text-[#183b25]">Current meat, eggs, and future availability</h2>
+            <h2 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">Current meat, eggs, and future availability</h2>
             <p className="mt-3 max-w-3xl leading-7 text-gray-700">Reserve available batches, ask about the next round, or join the interest list for pork, lamb, eggs, and future honey.</p>
           </div>
-          <Link href="/products" className="rounded-full bg-amber-300 px-5 py-3 font-black text-[#183b25]">See full availability</Link>
+          <Link href="/products" className="w-full rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25] sm:w-auto">See full availability</Link>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {products.map((product) => (
@@ -82,9 +82,9 @@ export default function HomePage() {
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">From the videos</p>
-            <h2 className="mt-2 text-4xl font-black text-[#183b25]">Homestead notes, turned into useful guides</h2>
+            <h2 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">Homestead notes, turned into useful guides</h2>
           </div>
-          <Link href="/blog" className="rounded-full bg-amber-300 px-5 py-3 font-black text-[#183b25]">See all posts</Link>
+          <Link href="/blog" className="w-full rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25] sm:w-auto">See all posts</Link>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {featured.map((post) => (

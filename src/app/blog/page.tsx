@@ -9,10 +9,10 @@ export const metadata = {
 export default function BlogPage() {
   const posts = getAllPosts();
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
-      <div className="mb-10 rounded-3xl bg-white p-8 shadow-lg shadow-green-900/5">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:py-14">
+      <div className="mb-8 rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5 sm:mb-10 sm:p-8">
         <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Blog</p>
-        <h1 className="mt-2 text-4xl font-black text-[#183b25] md:text-5xl">Every video, turned into a practical field note.</h1>
+        <h1 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl md:text-5xl">Every video, turned into a practical field note.</h1>
         <p className="mt-4 max-w-3xl text-lg leading-8 text-gray-700">Each post includes the video, what we learned, and the gear/search links we would use again. Amazon affiliate links are tagged with stifflerhom01-20.</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

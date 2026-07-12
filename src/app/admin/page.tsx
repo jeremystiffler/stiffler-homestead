@@ -5,10 +5,10 @@ export const metadata = {
 
 export default function AdminNotesPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-14">
-      <div className="rounded-3xl bg-white p-8 shadow-lg shadow-green-900/5">
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:py-14">
+      <div className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5 sm:p-8">
         <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Editing guide</p>
-        <h1 className="mt-2 text-4xl font-black text-[#183b25]">How to update products and availability</h1>
+        <h1 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">How to update products and availability</h1>
         <p className="mt-5 leading-8 text-gray-700">
           Product inventory is currently managed in a simple file-based CMS. It is safe, free, and easy to deploy — perfect until you are ready for paid checkout/database automation.
         </p>

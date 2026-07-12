@@ -11,20 +11,20 @@ export default function ProductsPage() {
   const products = getAllProducts();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
-      <section className="rounded-[2rem] bg-[#183b25] p-8 text-white shadow-xl shadow-green-900/10 md:p-10">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:py-14">
+      <section className="rounded-[2rem] bg-[#183b25] p-5 text-white shadow-xl shadow-green-900/10 sm:p-8 md:p-10">
         <p className="text-sm font-black uppercase tracking-[0.25em] text-amber-300">Local food from the homestead</p>
-        <h1 className="mt-3 max-w-4xl text-4xl font-black leading-tight md:text-6xl">
+        <h1 className="mt-3 max-w-4xl text-3xl font-black leading-tight sm:text-4xl md:text-6xl">
           Meat chickens, pork, lamb, eggs — and eventually maybe honey.
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-white/80">
           This is the public availability board for local pickup requests. Choose what is open, request a quantity, and we will personally confirm pickup timing, payment, and final availability.
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <a href={`mailto:${SITE_CONFIG.contactEmail}`} className="rounded-full bg-amber-300 px-5 py-3 font-black text-[#183b25]">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <a href={`mailto:${SITE_CONFIG.contactEmail}`} className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">
             Ask a question
           </a>
-          <a href="#availability" className="rounded-full border border-white/30 px-5 py-3 font-black text-white hover:bg-white/10">
+          <a href="#availability" className="rounded-full border border-white/30 px-5 py-3 text-center font-black text-white hover:bg-white/10">
             See availability
           </a>
         </div>
@@ -48,9 +48,9 @@ export default function ProductsPage() {
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Availability board</p>
-            <h2 className="mt-2 text-4xl font-black text-[#183b25]">Current homestead products</h2>
+            <h2 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">Current homestead products</h2>
           </div>
-          <a href="/blog" className="rounded-full bg-white px-5 py-3 font-black text-[#2f7d4b] shadow-sm">
+          <a href="/blog" className="w-full rounded-full bg-white px-5 py-3 text-center font-black text-[#2f7d4b] shadow-sm sm:w-auto">
             Read the homestead blog
           </a>
         </div>

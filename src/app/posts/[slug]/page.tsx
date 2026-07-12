@@ -54,10 +54,10 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   };
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12">
+    <article className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <span className="text-xs font-black uppercase tracking-[0.25em] text-[#2f7d4b]">{post.meta.category}</span>
-      <h1 className="my-4 text-4xl font-black leading-tight text-[#183b25] md:text-5xl">{post.meta.title}</h1>
+      <h1 className="my-4 text-3xl font-black leading-tight text-[#183b25] sm:text-4xl md:text-5xl">{post.meta.title}</h1>
       <p className="mb-8 text-sm font-semibold text-gray-500">
         {new Date(post.meta.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
       </p>
@@ -70,7 +70,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
         <strong>Disclosure:</strong> As an Amazon Associate I earn from qualifying purchases. Some posts also include Wisephone and Covenant Eyes affiliate links. Affiliate links help support the channel at no extra cost to you.
       </div>
-      <div className="prose prose-lg max-w-none rounded-3xl bg-white p-6 shadow-lg shadow-green-900/5 md:p-8">
+      <div className="prose prose-lg max-w-none rounded-3xl bg-white p-4 shadow-lg shadow-green-900/5 sm:p-6 md:p-8">
         <MDXRemote source={post.content} />
       </div>
       <div className="mt-8 grid gap-4 rounded-3xl bg-[#f7f3ea] p-5 md:grid-cols-2">
