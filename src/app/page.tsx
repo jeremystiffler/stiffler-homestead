@@ -5,10 +5,10 @@ import { getAllPosts } from "@/lib/posts";
 import { getFeaturedProducts } from "@/lib/products";
 import { SITE_CONFIG } from "@/lib/config";
 
-export default function HomePage() {
+export default async function HomePage() {
   const posts = getAllPosts();
   const featured = posts.slice(0, 6);
-  const products = getFeaturedProducts();
+  const products = await getFeaturedProducts();
 
   return (
     <div>

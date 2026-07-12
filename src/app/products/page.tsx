@@ -7,8 +7,8 @@ export const metadata = {
   description: "Reserve local Stiffler Homestead meat chickens, pork, lamb, eggs, and future honey availability near Lexington, Kentucky.",
 };
 
-export default function ProductsPage() {
-  const products = getAllProducts();
+export default async function ProductsPage() {
+  const products = await getAllProducts();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:py-14">
@@ -18,7 +18,7 @@ export default function ProductsPage() {
           Meat chickens, pork, lamb, eggs — and eventually maybe honey.
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-white/80">
-          This is the public availability board for local pickup requests. Choose what is open, request a quantity, and we will personally confirm pickup timing, payment, and final availability.
+          This is the public availability board for local pickup or paid checkout. Choose what is open, pick a quantity, and pay online when checkout is enabled.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a href={`mailto:${SITE_CONFIG.contactEmail}`} className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">
@@ -32,9 +32,9 @@ export default function ProductsPage() {
 
       <section className="mt-10 grid gap-5 md:grid-cols-3">
         {[
-          ["1", "Choose what is available", "Each card shows the current quantity, price note, and pickup expectations."],
-          ["2", "Send an order request", "Customers pick a quantity and send a prefilled email request — no surprise checkout, no cold frozen chicken roulette."],
-          ["3", "Confirm personally", "You confirm the order, pickup timing, payment method, and final details before anything is locked in."],
+          ["1", "Choose what is available", "Each card shows the current quantity, price, image, and pickup expectations."],
+          ["2", "Checkout or request", "Stripe checkout can collect payment online; PayPal, Venmo, or email requests can be shown too."],
+          ["3", "Inventory updates", "Paid Stripe orders reduce the product quantity automatically when the webhook is connected."],
         ].map(([step, title, copy]) => (
           <div key={step} className="rounded-3xl bg-white p-6 shadow-lg shadow-green-900/5">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-amber-300 font-black text-[#183b25]">{step}</div>
