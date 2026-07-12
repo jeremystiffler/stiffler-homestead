@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { Analytics } from "@vercel/analytics/next";
 import OutboundClickTracker from "@/components/OutboundClickTracker";
+import YouTubeSubscribePopout from "@/components/YouTubeSubscribePopout";
 import { SITE_CONFIG } from "@/lib/config";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </nav>
+        <YouTubeSubscribePopout />
         <main className="min-h-screen">{children}</main>
         <footer className="bg-[#183b25] py-10 text-sm text-white/75">
           <div className="mx-auto grid max-w-6xl gap-5 px-4 md:grid-cols-[1fr_auto] md:items-center">
