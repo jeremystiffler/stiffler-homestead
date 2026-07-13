@@ -196,7 +196,9 @@ export default function ProductAdmin() {
       setProducts(normalizedProducts);
       setSelected((current) => {
         const matchingProduct = normalizedProducts.find((product: ProductRow) => product.id ? product.id === current.id : product.slug === current.slug);
-        return matchingProduct ? normalizeProduct(matchingProduct) : current;
+        if (matchingProduct) return normalizeProduct(matchingProduct);
+        if (!current.id && !current.slug && !current.name && normalizedProducts[0]) return normalizeProduct(normalizedProducts[0]);
+        return current;
       });
       if (showMessage) setMessage("Products loaded.");
     } catch (error) {
@@ -230,6 +232,9 @@ export default function ProductAdmin() {
       setMessage("Saving product…");
     }
     try {
+      if (!productToSave.name?.trim()) {
+        throw new Error("Choose a product from the dropdown/sidebar before saving, or enter a new product name.");
+      }
       const normalized = {
         ...productToSave,
         price_cents: productToSave === selected ? dollarsToCents(priceInput) : productToSave.price_cents,
@@ -451,6 +456,9 @@ export default function ProductAdmin() {
 
       <section className="grid gap-8">
         <div className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5 sm:p-8">
+          <div className="mb-5 rounded-2xl bg-green-50 p-4 text-sm font-black text-green-900 ring-2 ring-green-100">
+            Editing: {selected.name ? selected.name : "No product selected — choose one from the dropdown or click New product and enter a name."}
+          </div>
           <div className="grid gap-5">
             <div>
               <div className="overflow-hidden rounded-2xl bg-[#ddf8e8] sm:h-72">
