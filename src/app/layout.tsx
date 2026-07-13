@@ -52,11 +52,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="truncate text-sm sm:text-base">Stiffler Homestead</span>
             </Link>
             <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-gray-700 sm:w-auto sm:justify-end sm:text-sm md:gap-5">
-              <Link href="/products">Storefront</Link>
+              <Link href="/products" className="rounded-full bg-[#2f7d4b] px-4 py-2 text-white">Storefront</Link>
               <Link href="/blog">Blog</Link>
               <Link href="/homestead-supplies">Gear Guides</Link>
               <Link href="/#newsletter">Subscribe</Link>
-              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer" className="hidden rounded-full bg-[#2f7d4b] px-4 py-2 text-white md:inline-block">
+              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer">
                 Supply Guide
               </a>
             </div>
