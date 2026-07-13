@@ -12,6 +12,7 @@ export interface HomesteadProduct {
   priceNote?: string;
   unitLabel: string;
   availableQuantity: number;
+  infiniteQuantity?: boolean;
   status: ProductStatus;
   availabilityWindow: string;
   pickupNote: string;
@@ -87,7 +88,8 @@ export const PRODUCTS: HomesteadProduct[] = [
     priceNote: "Egg price will be confirmed before pickup.",
     unitLabel: "dozens",
     availableQuantity: 0,
-    status: "sold_out",
+    infiniteQuantity: true,
+    status: "available",
     availabilityWindow: "Weekly availability varies",
     pickupNote: "Local pickup only. We will confirm current inventory before pickup.",
     imageEmoji: "🥚",

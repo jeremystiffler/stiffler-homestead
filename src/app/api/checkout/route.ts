@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   if (productError) return NextResponse.json({ error: productError.message }, { status: 500 });
   const product = products?.[0];
   if (!product) return NextResponse.json({ error: "Product not found." }, { status: 404 });
-  if (!["available", "preorder"].includes(product.status) || product.available_quantity < quantity) {
+  if (!["available", "preorder"].includes(product.status) || (!product.infinite_quantity && product.available_quantity < quantity)) {
     return NextResponse.json({ error: "That quantity is not available." }, { status: 400 });
   }
   if (!product.price_cents || product.price_cents <= 0) {

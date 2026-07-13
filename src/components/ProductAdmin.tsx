@@ -12,6 +12,7 @@ type ProductRow = {
   price_note?: string | null;
   unit_label: string;
   available_quantity: number;
+  infinite_quantity?: boolean;
   status: string;
   availability_window: string;
   pickup_note: string;
@@ -50,6 +51,7 @@ const blankProduct: ProductRow = {
   price_note: "",
   unit_label: "items",
   available_quantity: 0,
+  infinite_quantity: false,
   status: "coming_soon",
   availability_window: "Update availability",
   pickup_note: "Local pickup near Lexington, KY. Pickup details will be confirmed after purchase.",
@@ -407,7 +409,16 @@ export default function ProductAdmin() {
                   className="rounded-xl border border-green-900/20 px-4 py-3 font-medium"
                 />
               </label>
-              <Field label="Available quantity" type="number" value={String(selected.available_quantity)} onChange={(value) => update("available_quantity", Number(value))} />
+              <label className="grid gap-2 text-sm font-black text-[#183b25]">Available quantity
+                <input
+                  type="number"
+                  min="0"
+                  value={String(selected.available_quantity)}
+                  disabled={Boolean(selected.infinite_quantity)}
+                  onChange={(event) => update("available_quantity", Number(event.target.value))}
+                  className="rounded-xl border border-green-900/20 px-4 py-3 font-medium disabled:bg-gray-100 disabled:text-gray-400"
+                />
+              </label>
               <Field label="Unit label" value={selected.unit_label} onChange={(value) => update("unit_label", value)} />
               <Field label="Fallback emoji" value={selected.image_emoji || ""} onChange={(value) => update("image_emoji", value)} />
               <Field label="Price note" value={selected.price_note || ""} onChange={(value) => update("price_note", value)} />
@@ -436,6 +447,13 @@ export default function ProductAdmin() {
           <label className="mt-4 flex items-center gap-3 text-sm font-black text-[#183b25]">
             <input type="checkbox" checked={selected.featured} onChange={(event) => update("featured", event.target.checked)} />
             Feature on homepage
+          </label>
+          <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f7f3ea] p-4 text-sm font-black text-[#183b25]">
+            <input type="checkbox" checked={Boolean(selected.infinite_quantity)} onChange={(event) => update("infinite_quantity", event.target.checked)} className="mt-1" />
+            <span>
+              Infinite quantity / always available
+              <span className="mt-1 block text-xs font-semibold leading-5 text-gray-600">Use this for eggs or other products where inventory should not count down after orders.</span>
+            </span>
           </label>
           <div className="mt-6 flex flex-wrap gap-3">
             <button type="button" onClick={() => saveProduct()} disabled={loading} className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white disabled:opacity-60">

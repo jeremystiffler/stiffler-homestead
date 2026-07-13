@@ -44,6 +44,7 @@ export async function POST(request: Request) {
     price_note: body.price_note || null,
     unit_label: body.unit_label || "items",
     available_quantity: Math.max(0, Number(body.available_quantity || 0)),
+    infinite_quantity: Boolean(body.infinite_quantity),
     status: body.status || "coming_soon",
     availability_window: body.availability_window || "Update availability",
     pickup_note: body.pickup_note || "Local pickup details will be confirmed after purchase.",

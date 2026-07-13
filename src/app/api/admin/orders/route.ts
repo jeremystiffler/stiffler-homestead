@@ -40,14 +40,24 @@ export async function PATCH(request: Request) {
   if (action === "mark_paid") {
     if (order.status === "paid") return NextResponse.json({ order });
 
-    const { error: decrementError } = await supabase.rpc("decrement_homestead_product_inventory", {
-      product_id_input: order.product_id,
-      quantity_input: order.quantity,
-    });
+    const { data: product, error: productError } = await supabase
+      .from("homestead_products")
+      .select("infinite_quantity")
+      .eq("id", order.product_id)
+      .single();
 
-    if (decrementError) {
-      await supabase.from("homestead_orders").update({ status: "inventory_error", notes: decrementError.message }).eq("id", orderId);
-      return NextResponse.json({ error: decrementError.message }, { status: 409 });
+    if (productError) return NextResponse.json({ error: productError.message }, { status: 500 });
+
+    if (!product?.infinite_quantity) {
+      const { error: decrementError } = await supabase.rpc("decrement_homestead_product_inventory", {
+        product_id_input: order.product_id,
+        quantity_input: order.quantity,
+      });
+
+      if (decrementError) {
+        await supabase.from("homestead_orders").update({ status: "inventory_error", notes: decrementError.message }).eq("id", orderId);
+        return NextResponse.json({ error: decrementError.message }, { status: 409 });
+      }
     }
 
     const { data: updated, error: updateError } = await supabase

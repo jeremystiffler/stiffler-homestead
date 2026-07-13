@@ -30,13 +30,21 @@ export async function POST(request: Request) {
     if (orderId && productId && quantity > 0) {
       const { data: order } = await supabase.from("homestead_orders").select("status").eq("id", orderId).single();
       if (order?.status !== "paid") {
-        const { error: decrementError } = await supabase.rpc("decrement_homestead_product_inventory", {
-          product_id_input: productId,
-          quantity_input: quantity,
-        });
-        if (decrementError) {
-          await supabase.from("homestead_orders").update({ status: "inventory_error", notes: decrementError.message }).eq("id", orderId);
-          return NextResponse.json({ error: decrementError.message }, { status: 500 });
+        const { data: product } = await supabase
+          .from("homestead_products")
+          .select("infinite_quantity")
+          .eq("id", productId)
+          .single();
+
+        if (!product?.infinite_quantity) {
+          const { error: decrementError } = await supabase.rpc("decrement_homestead_product_inventory", {
+            product_id_input: productId,
+            quantity_input: quantity,
+          });
+          if (decrementError) {
+            await supabase.from("homestead_orders").update({ status: "inventory_error", notes: decrementError.message }).eq("id", orderId);
+            return NextResponse.json({ error: decrementError.message }, { status: 500 });
+          }
         }
 
         await supabase

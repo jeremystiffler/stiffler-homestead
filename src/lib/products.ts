@@ -12,6 +12,7 @@ type ProductRow = {
   price_note: string | null;
   unit_label: string;
   available_quantity: number;
+  infinite_quantity?: boolean | null;
   status: HomesteadProduct["status"];
   availability_window: string;
   pickup_note: string;
@@ -44,7 +45,8 @@ export function rowToProduct(row: ProductRow): HomesteadProduct {
     priceNote: row.price_note || undefined,
     unitLabel: row.unit_label,
     availableQuantity: row.available_quantity,
-    status: row.available_quantity <= 0 && (row.status === "available" || row.status === "preorder") ? "sold_out" : row.status,
+    infiniteQuantity: Boolean(row.infinite_quantity),
+    status: !row.infinite_quantity && row.available_quantity <= 0 && (row.status === "available" || row.status === "preorder") ? "sold_out" : row.status,
     availabilityWindow: row.availability_window,
     pickupNote: row.pickup_note,
     imageUrl: row.image_url || undefined,
@@ -85,6 +87,6 @@ export async function getProduct(slug: string) {
   return (await getAllProducts()).find((product) => product.slug === slug) || null;
 }
 
-export function isProductOrderable(product: { status: string; availableQuantity: number; priceCents?: number }) {
-  return (product.status === "available" || product.status === "preorder") && product.availableQuantity > 0;
+export function isProductOrderable(product: { status: string; availableQuantity: number; infiniteQuantity?: boolean; priceCents?: number }) {
+  return (product.status === "available" || product.status === "preorder") && (Boolean(product.infiniteQuantity) || product.availableQuantity > 0);
 }

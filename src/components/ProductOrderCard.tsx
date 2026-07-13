@@ -17,9 +17,11 @@ function briefDescription(description: string) {
 export default function ProductOrderCard({ product }: { product: HomesteadProduct }) {
   const orderable = isProductOrderable(product);
   const paidCheckoutReady = orderable && product.priceCents > 0;
+  const venmoReady = paidCheckoutReady && Boolean(product.venmoUrl);
   const [quantity, setQuantity] = useState(orderable ? 1 : 0);
-  const [loading, setLoading] = useState(false);
+  const [loadingPayment, setLoadingPayment] = useState<"stripe" | "venmo" | null>(null);
   const [error, setError] = useState("");
+  const infiniteQuantity = Boolean(product.infiniteQuantity);
   const max = Math.max(product.availableQuantity, 0);
 
   const mailtoHref = useMemo(() => {
@@ -47,7 +49,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
     }
 
     setError("");
-    setLoading(true);
+    setLoadingPayment("stripe");
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -59,8 +61,27 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
       window.location.href = data.url;
     } catch (checkoutError) {
       setError(checkoutError instanceof Error ? checkoutError.message : "Checkout could not be started.");
-    } finally {
-      setLoading(false);
+      setLoadingPayment(null);
+    }
+  }
+
+  async function payWithVenmo() {
+    if (!venmoReady) return;
+
+    setError("");
+    setLoadingPayment("venmo");
+    try {
+      const response = await fetch("/api/manual-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: "venmo", productId: product.id, slug: product.slug, quantity }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Venmo payment could not be started.");
+      window.location.href = data.paymentUrl;
+    } catch (venmoError) {
+      setError(venmoError instanceof Error ? venmoError.message : "Venmo payment could not be started.");
+      setLoadingPayment(null);
     }
   }
 
@@ -89,7 +110,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2f7d4b]">Quantity</p>
               <p className="mt-1 font-bold text-[#183b25]">
-                {orderable ? `${max} ${product.unitLabel} available` : "Subscribe for new availability"}
+                {orderable ? infiniteQuantity ? `${product.unitLabel} available weekly` : `${max} ${product.unitLabel} available` : "Subscribe for new availability"}
               </p>
             </div>
             {orderable && (
@@ -98,11 +119,11 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                 aria-label={`Quantity for ${product.name}`}
                 type="number"
                 min={1}
-                max={max}
+                max={infiniteQuantity ? undefined : max}
                 value={quantity}
                 onChange={(event) => {
                   const next = Number(event.target.value);
-                  setQuantity(Number.isNaN(next) ? 1 : Math.min(Math.max(next, 1), max));
+                  setQuantity(Number.isNaN(next) ? 1 : infiniteQuantity ? Math.max(Math.floor(next), 1) : Math.min(Math.max(Math.floor(next), 1), max));
                 }}
                 className="w-24 rounded-xl border border-green-900/20 bg-white px-3 py-2 text-center text-lg font-black text-[#183b25] outline-none focus:border-[#2f7d4b]"
               />
@@ -112,9 +133,17 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
 
         <div className="mt-5">
           {orderable ? (
-            <button type="button" onClick={purchase} disabled={loading} className="w-full rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f] disabled:cursor-not-allowed disabled:opacity-60">
-              {loading ? "Opening checkout..." : paidCheckoutReady ? "Purchase" : "Request purchase"}
-            </button>
+            <div className="grid gap-3">
+              <button type="button" onClick={purchase} disabled={Boolean(loadingPayment)} className="w-full rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f] disabled:cursor-not-allowed disabled:opacity-60">
+                {loadingPayment === "stripe" ? "Opening secure checkout..." : paidCheckoutReady ? "Pay by card" : "Request purchase"}
+              </button>
+              {venmoReady && (
+                <button type="button" onClick={payWithVenmo} disabled={Boolean(loadingPayment)} className="w-full rounded-full border-2 border-[#3d95ce] bg-white px-5 py-3 text-center font-black text-[#2675a9] hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-60">
+                  {loadingPayment === "venmo" ? "Opening Venmo..." : "Pay with Venmo"}
+                </button>
+              )}
+              {venmoReady && <p className="text-center text-xs font-semibold leading-5 text-gray-500">Venmo orders stay pending until we confirm payment, then inventory updates.</p>}
+            </div>
           ) : (
             <SubscribePopup
               label="Subscribe for availability"
