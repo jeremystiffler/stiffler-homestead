@@ -4,6 +4,8 @@ import { SITE_CONFIG } from "@/lib/config";
 import { getAllProducts } from "@/lib/products";
 import ProductOrderCard from "@/components/ProductOrderCard";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Local Farm Food Near Lexington KY | Meat Chickens, Eggs, Pork & Lamb",
   description:

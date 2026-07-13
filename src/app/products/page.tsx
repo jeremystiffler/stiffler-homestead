@@ -8,6 +8,8 @@ export const metadata = {
   alternates: { canonical: "/products" },
 };
 
+export const dynamic = "force-dynamic";
+
 const productFaqs = [
   ["Is this local pickup only?", "Yes. Stiffler Homestead storefront orders are for local customers near Lexington, Kentucky. We do not offer delivery or shipping through this storefront."],
   ["How do I buy?", "Choose a product, select the quantity, enter your contact info, and pay with the available checkout option. We will coordinate a pickup time after your order is confirmed."],

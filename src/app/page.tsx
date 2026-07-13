@@ -5,6 +5,8 @@ import { getAllPosts } from "@/lib/posts";
 import { getFeaturedProducts } from "@/lib/products";
 import { SITE_CONFIG } from "@/lib/config";
 
+export const dynamic = "force-dynamic";
+
 const homepageFaqs = [
   {
     question: "Can I buy local meat chickens from Stiffler Homestead near Lexington, KY?",
