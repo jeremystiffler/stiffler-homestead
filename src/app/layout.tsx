@@ -4,7 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { Analytics } from "@vercel/analytics/next";
 import OutboundClickTracker from "@/components/OutboundClickTracker";
-import YouTubeSubscribePopout from "@/components/YouTubeSubscribePopout";
+import SubscribePopup from "@/components/SubscribePopup";
 import { SITE_CONFIG } from "@/lib/config";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -12,22 +12,21 @@ const siteUrl = SITE_CONFIG.siteUrl;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "Stiffler Homestead | Local Food & Homestead Guides Near Lexington KY", template: `%s | Stiffler Homestead` },
-  description: "Local homestead meat chickens, eggs, pork, lamb, practical family projects, YouTube field notes, and affiliate-supported homesteading resources from Lexington, Kentucky.",
+  title: { default: "Stiffler Homestead | Local Food & Family Homesteading Near Lexington KY", template: `%s | Stiffler Homestead` },
+  description: "Local homestead meat chickens, eggs, pork, lamb, practical family projects, and YouTube field notes from Lexington, Kentucky.",
   keywords: [
     "Stiffler Homestead",
     "Lexington KY homestead",
     "local meat chickens Lexington KY",
     "farm fresh eggs Lexington KY",
     "pasture raised chicken Kentucky",
-    "homestead supply guide",
     "family homesteading",
     "chicken coop automation",
   ],
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Stiffler Homestead | Local Food & Homestead Guides Near Lexington KY",
-    description: "Local farm food availability, practical homestead projects, YouTube guides, and family-tested supply recommendations.",
+    title: "Stiffler Homestead | Local Food & Family Homesteading Near Lexington KY",
+    description: "Local farm food availability, practical homestead projects, and YouTube field notes.",
     url: siteUrl,
     siteName: "Stiffler Homestead",
     type: "website",
@@ -36,7 +35,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Stiffler Homestead",
-    description: "Local food, family homesteading projects, and practical supply guides near Lexington, Kentucky.",
+    description: "Local food and family homesteading projects near Lexington, Kentucky.",
   },
   robots: { index: true, follow: true },
 };
@@ -57,15 +56,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex w-full flex-wrap items-center gap-2 rounded-full border border-green-900/10 bg-white/70 p-1 text-xs font-bold text-gray-700 shadow-sm sm:w-auto sm:justify-end sm:text-sm">
               <Link href="/products" className="rounded-full bg-[#2f7d4b] px-4 py-2 text-white shadow-sm">Storefront</Link>
               <Link href="/blog" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Blog</Link>
-              <Link href="/homestead-supplies" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Gear Guides</Link>
-              <Link href="/#newsletter" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Subscribe</Link>
-              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">
-                Supply Guide
-              </a>
+              <SubscribePopup />
             </div>
           </div>
         </nav>
-        <YouTubeSubscribePopout />
+        <SubscribePopup floating label="Subscribe" />
         <main className="min-h-screen">{children}</main>
         <footer className="bg-[#183b25] py-10 text-sm text-white/75">
           <div className="mx-auto grid max-w-6xl gap-5 px-4 md:grid-cols-[1fr_auto] md:items-center">
@@ -75,9 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
             <div className="flex flex-wrap gap-4">
               <Link href="/products">Storefront</Link>
-              <Link href="/homestead-supplies">Gear Guides</Link>
               <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer">YouTube</a>
-              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer">Homestead Supply Guide</a>
               <Link href="/disclosure">Disclosure</Link>
             </div>
           </div>

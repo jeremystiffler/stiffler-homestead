@@ -7,6 +7,7 @@ interface EmailSignupProps {
   heading?: string;
   subtext?: string;
   className?: string;
+  compact?: boolean;
 }
 
 type InterestKey = "food" | "videos";
@@ -18,114 +19,60 @@ const INTEREST_OPTIONS: Array<{
 }> = [
   {
     key: "food",
-    label: "Food sales & availability",
-    description: "Local food availability and pickup windows.",
+    label: "Farm products & pickup openings",
+    description: "Local-only notices for meat, eggs, availability, and pickup windows.",
   },
   {
     key: "videos",
-    label: "Latest videos & homestead updates",
-    description: "New YouTube videos, project notes, and practical guides.",
+    label: "Videos & homestead updates",
+    description: "New YouTube videos, project notes, blog posts, and family homestead updates.",
   },
 ];
 
-const MAILCHIMP_INTEREST_FIELDS: Record<InterestKey, { inputName: string; value: string }> = {
-  food: {
-    inputName: SITE_CONFIG.mailchimpFoodInterestInputName,
-    value: SITE_CONFIG.mailchimpFoodInterestValue,
-  },
-  videos: {
-    inputName: SITE_CONFIG.mailchimpVideosInterestInputName,
-    value: SITE_CONFIG.mailchimpVideosInterestValue,
-  },
-};
-
 export default function EmailSignup({
   heading = "Follow the homestead journey",
-  subtext = "Choose food sale notices, new video updates, or both — and subscribe to the YouTube channel while you’re here.",
+  subtext = "Subscribe for upcoming farm products, local pickup openings, videos, and other Stiffler Homestead updates.",
   className = "",
+  compact = false,
 }: EmailSignupProps) {
   const [email, setEmail] = useState("");
   const [selectedInterests, setSelectedInterests] = useState<Record<InterestKey, boolean>>({ food: true, videos: true });
-  const [status, setStatus] = useState<"idle" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
 
   function toggleInterest(key: InterestKey) {
     setSelectedInterests((current) => ({ ...current, [key]: !current[key] }));
   }
 
-  function selectedInterestLabels() {
-    return INTEREST_OPTIONS.filter((option) => selectedInterests[option.key]).map((option) => option.label);
-  }
-
-  function appendInput(form: HTMLFormElement, name: string, value: string) {
-    const input = document.createElement("input");
-    input.name = name;
-    input.value = value;
-    form.appendChild(input);
-  }
-
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!email.trim()) return;
+    const interests = INTEREST_OPTIONS.filter((option) => selectedInterests[option.key]).map((option) => option.key);
+    setStatus("idle");
+    setMessage("");
 
-    const interests = selectedInterestLabels();
-    const interestText = interests.length > 0 ? interests.join(", ") : "No preference selected";
-
-    if (!SITE_CONFIG.mailchimpActionUrl) {
-      window.location.href = `mailto:${SITE_CONFIG.contactEmail}?subject=Add me to Stiffler Homestead&body=${encodeURIComponent(
-        `Please add this email to the Stiffler Homestead list: ${email}\n\nPreferences: ${interestText}\n\nYouTube channel: ${SITE_CONFIG.youtubeSubscribeUrl}`,
-      )}`;
-      return;
+    try {
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, interests, source: compact ? "subscribe-popup" : "website-newsletter" }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to subscribe right now.");
+      setStatus("success");
+      setMessage("You’re on the list. We’ll send farm product openings and homestead updates without turning your inbox into a chicken stampede.");
+      setEmail("");
+    } catch (error) {
+      setStatus("error");
+      setMessage(error instanceof Error ? error.message : "Unable to subscribe right now.");
     }
-
-    const iframeName = `mailchimp-iframe-${Date.now()}`;
-    const iframe = document.createElement("iframe");
-    iframe.name = iframeName;
-    iframe.style.display = "none";
-    document.body.appendChild(iframe);
-
-    const form = document.createElement("form");
-    form.action = SITE_CONFIG.mailchimpActionUrl;
-    form.method = "POST";
-    form.target = iframeName;
-    form.style.display = "none";
-
-    appendInput(form, "EMAIL", email);
-
-    INTEREST_OPTIONS.forEach((option) => {
-      const field = MAILCHIMP_INTEREST_FIELDS[option.key];
-      if (selectedInterests[option.key] && field.inputName) {
-        appendInput(form, field.inputName, field.value);
-      }
-    });
-
-    if (SITE_CONFIG.mailchimpInterestsMergeField) {
-      appendInput(form, SITE_CONFIG.mailchimpInterestsMergeField, interestText);
-    }
-
-    if (SITE_CONFIG.mailchimpBotTrapName) {
-      const trap = document.createElement("input");
-      trap.name = SITE_CONFIG.mailchimpBotTrapName;
-      trap.tabIndex = -1;
-      trap.value = "";
-      form.appendChild(trap);
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-    setStatus("success");
-    setEmail("");
-    window.setTimeout(() => {
-      form.remove();
-      iframe.remove();
-    }, 1500);
   }
 
   return (
     <section className={`overflow-hidden rounded-3xl bg-[#183b25] text-white shadow-xl ${className}`}>
-      <div className="grid gap-0 lg:grid-cols-[1.15fr_.85fr]">
-        <div className="p-6 md:p-8">
+      <div className={`grid gap-0 ${compact ? "" : "lg:grid-cols-[1.15fr_.85fr]"}`}>
+        <div className={compact ? "p-5" : "p-6 md:p-8"}>
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-amber-200">Newsletter</p>
-          <h2 className="mt-2 text-2xl font-black md:text-3xl">{heading}</h2>
+          <h2 className={`${compact ? "text-2xl" : "text-2xl md:text-3xl"} mt-2 font-black`}>{heading}</h2>
           <p className="mt-2 max-w-2xl text-white/80">{subtext}</p>
 
           <form onSubmit={submit} className="mt-5 space-y-4">
@@ -138,7 +85,7 @@ export default function EmailSignup({
               className="w-full rounded-full border border-white/20 bg-white px-5 py-3 text-gray-900 outline-none ring-amber-300 placeholder:text-gray-400 focus:ring-4"
             />
 
-            <fieldset className="grid gap-3 md:grid-cols-2">
+            <fieldset className={`grid gap-3 ${compact ? "" : "md:grid-cols-2"}`}>
               <legend className="sr-only">Choose what you want to hear about</legend>
               {INTEREST_OPTIONS.map((option) => (
                 <label
@@ -180,25 +127,24 @@ export default function EmailSignup({
             </div>
           </form>
 
-          {status === "success" && (
-            <p className="mt-4 rounded-2xl bg-white/10 p-4 text-sm text-amber-100">
-              Thanks — check your inbox soon. Want the videos too? Hit the YouTube subscribe button before you wander off like a free-range rooster.
+          {message && (
+            <p className={`mt-4 rounded-2xl p-4 text-sm ${status === "error" ? "bg-red-100 text-red-900" : "bg-white/10 text-amber-100"}`}>
+              {message}
             </p>
-          )}
-          {!SITE_CONFIG.mailchimpActionUrl && (
-            <p className="mt-4 text-xs text-white/60">Mailchimp form URL is not configured yet, so this currently opens a prefilled email fallback.</p>
           )}
         </div>
 
-        <div className="bg-[#ddf8e8] p-6 text-[#183b25] md:p-8">
-          <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Choose your updates</p>
-          <h3 className="mt-2 text-3xl font-black leading-tight">Food sales, fresh videos, or the whole farm bundle.</h3>
-          <ul className="mt-5 space-y-3 text-sm font-semibold text-gray-700">
-            <li className="rounded-2xl bg-white p-4 shadow-sm">🍗 Food notices stay focused on sale dates, batch availability, and pickup details.</li>
-            <li className="rounded-2xl bg-white p-4 shadow-sm">🎥 Video updates send the latest Stiffler Homestead guides and YouTube field notes.</li>
-            <li className="rounded-2xl bg-white p-4 shadow-sm">✅ Pick both if you want the full dirt-under-the-fingernails experience.</li>
-          </ul>
-        </div>
+        {!compact && (
+          <div className="bg-[#ddf8e8] p-6 text-[#183b25] md:p-8">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Choose your updates</p>
+            <h3 className="mt-2 text-3xl font-black leading-tight">Food sales, fresh videos, or the whole farm bundle.</h3>
+            <ul className="mt-5 space-y-3 text-sm font-semibold text-gray-700">
+              <li className="rounded-2xl bg-white p-4 shadow-sm">🍗 Food notices stay focused on sale dates, availability, and local pickup details.</li>
+              <li className="rounded-2xl bg-white p-4 shadow-sm">🎥 Video updates help the channel grow and keep you connected to the projects behind the farm.</li>
+              <li className="rounded-2xl bg-white p-4 shadow-sm">✅ Pick both if you want the full dirt-under-the-fingernails experience.</li>
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   );

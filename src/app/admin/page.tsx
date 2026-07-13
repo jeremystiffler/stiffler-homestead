@@ -1,4 +1,5 @@
 import ProductAdmin from "@/components/ProductAdmin";
+import NewsletterAdmin from "@/components/NewsletterAdmin";
 
 export const metadata = {
   title: "Homestead Product Admin",
@@ -16,6 +17,7 @@ export default function AdminPage() {
         </p>
       </div>
       <ProductAdmin />
+      <NewsletterAdmin />
       <div className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
         <h2 className="font-black">Setup required before live payments</h2>
         <ul className="mt-3 list-disc space-y-2 pl-6 leading-7">

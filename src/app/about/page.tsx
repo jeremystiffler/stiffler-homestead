@@ -1,5 +1,3 @@
-import { SITE_CONFIG } from "@/lib/config";
-
 export const metadata = { title: "About" };
 
 export default function AboutPage() {
@@ -12,7 +10,7 @@ export default function AboutPage() {
           We are a family homestead in Lexington, Kentucky, documenting the real work of building practical systems with chickens, sheep, compost, kids, and a lot of trial-and-error.
         </p>
         <p className="mt-4 leading-8 text-gray-700">
-          This site turns our videos into written field notes with gear links, lessons learned, and the occasional “please do not repeat our mistake” warning. For broader comparison-style buying guides, visit our linked resource: <a className="font-bold text-[#2f7d4b] underline" href={SITE_CONFIG.supplyGuideUrl}>Homestead Supply Guide</a>.
+          This site turns our videos into written field notes, lessons learned, product updates, and the occasional “please do not repeat our mistake” warning.
         </p>
       </div>
     </div>

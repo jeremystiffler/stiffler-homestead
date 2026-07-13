@@ -58,7 +58,7 @@ export default async function LocalFoodLexingtonPage() {
         { "@type": "City", name: "Lexington" },
         { "@type": "AdministrativeArea", name: "Kentucky" },
       ],
-      sameAs: [SITE_CONFIG.youtubeUrl, SITE_CONFIG.supplyGuideUrl],
+      sameAs: [SITE_CONFIG.youtubeUrl],
     },
     {
       "@context": "https://schema.org",

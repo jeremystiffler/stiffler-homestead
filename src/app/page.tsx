@@ -31,7 +31,7 @@ export default async function HomePage() {
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.siteUrl,
       description: SITE_CONFIG.tagline,
-      sameAs: [SITE_CONFIG.youtubeUrl, SITE_CONFIG.supplyGuideUrl],
+      sameAs: [SITE_CONFIG.youtubeUrl],
     },
     {
       "@context": "https://schema.org",
@@ -39,7 +39,7 @@ export default async function HomePage() {
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.siteUrl,
       email: SITE_CONFIG.contactEmail,
-      sameAs: [SITE_CONFIG.youtubeUrl, SITE_CONFIG.supplyGuideUrl],
+      sameAs: [SITE_CONFIG.youtubeUrl],
     },
     {
       "@context": "https://schema.org",
@@ -64,7 +64,7 @@ export default async function HomePage() {
               Local homestead food, family-tested projects, and field notes from the Stiffler place.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-700 sm:text-xl">
-              Reserve currently available homestead food for local pickup near Lexington, KY, follow practical notes from our family projects, and browse the supplies and family-tech tools we actually recommend.
+              Reserve currently available homestead food for local pickup near Lexington, KY, follow practical notes from our family projects, and subscribe for upcoming farm product openings.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link href="/products" className="rounded-full bg-[#2f7d4b] px-6 py-3 text-center font-black text-white shadow-lg shadow-green-900/10 hover:bg-[#27683f]">
@@ -73,9 +73,7 @@ export default async function HomePage() {
               <Link href="/products" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
                 See current availability
               </Link>
-              <Link href="/homestead-supplies" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
-                Shop gear guides
-              </Link>
+
             </div>
           </div>
           <div className="rounded-[2rem] bg-white p-3 shadow-2xl shadow-green-900/10 sm:p-4 md:rotate-1">
@@ -125,14 +123,14 @@ export default async function HomePage() {
         <div className="grid gap-6 rounded-[2rem] bg-[#183b25] p-5 text-white shadow-xl shadow-green-900/10 sm:p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.25em] text-amber-300">Around the homestead</p>
-            <h2 className="mt-2 text-3xl font-black sm:text-4xl">Food, field notes, and practical tools we use.</h2>
+            <h2 className="mt-2 text-3xl font-black sm:text-4xl">Food, field notes, and farm updates.</h2>
             <p className="mt-4 max-w-3xl leading-8 text-white/80">
-              The storefront is for local pickup orders. The blog shares what we are learning. The gear guides collect tools and resources that have helped us build a calmer, more practical family homestead.
+              The storefront is for local pickup orders. The blog shares what we are learning. The email list lets local families know when farm products and new homestead updates are available.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 md:min-w-80 md:grid-cols-1">
             <Link href="/products" className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">Visit the storefront</Link>
-            <Link href="/homestead-supplies" className="rounded-full border border-white/30 px-5 py-3 text-center font-black text-white hover:bg-white/10">Affiliate gear hub</Link>
+            <Link href="/#newsletter" className="rounded-full border border-white/30 px-5 py-3 text-center font-black text-white hover:bg-white/10">Join the email list</Link>
           </div>
         </div>
       </section>
