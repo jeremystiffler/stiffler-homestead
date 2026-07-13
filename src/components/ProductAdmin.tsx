@@ -180,12 +180,14 @@ export default function ProductAdmin() {
   const [selected, setSelected] = useState<ProductRow>(blankProduct);
   const [priceInput, setPriceInput] = useState("");
   const [message, setMessage] = useState("");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [lastSavedAt, setLastSavedAt] = useState("");
   const [loading, setLoading] = useState(false);
   const [dragSlug, setDragSlug] = useState("");
 
-  async function loadProducts() {
+  async function loadProducts(showMessage = true) {
     setLoading(true);
-    setMessage("");
+    if (showMessage) setMessage("");
     try {
       const response = await fetch(`/api/admin/products?t=${Date.now()}`, { cache: "no-store" });
       const data = await response.json();
@@ -196,7 +198,7 @@ export default function ProductAdmin() {
         const matchingProduct = normalizedProducts.find((product: ProductRow) => product.id ? product.id === current.id : product.slug === current.slug);
         return matchingProduct ? normalizeProduct(matchingProduct) : current;
       });
-      setMessage("Products loaded.");
+      if (showMessage) setMessage("Products loaded.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to load products.");
     } finally {
@@ -222,7 +224,11 @@ export default function ProductAdmin() {
 
   async function saveProduct(productToSave = selected, quiet = false) {
     setLoading(true);
-    if (!quiet) setMessage("");
+    if (!quiet) {
+      setSaveStatus("saving");
+      setLastSavedAt("");
+      setMessage("Saving product…");
+    }
     try {
       const normalized = {
         ...productToSave,
@@ -249,10 +255,16 @@ export default function ProductAdmin() {
         nextProducts[existingIndex] = savedProduct;
         return nextProducts;
       });
-      if (!quiet) setMessage("Saved. Public inventory updates immediately.");
-      await loadProducts();
+      if (!quiet) {
+        const savedAt = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+        setSaveStatus("saved");
+        setLastSavedAt(savedAt);
+        setMessage(`✅ Saved correctly at ${savedAt}. Database confirmed infinite quantity is ${savedProduct.infinite_quantity ? "ON" : "OFF"}.`);
+      }
+      await loadProducts(false);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to save product.");
+      if (!quiet) setSaveStatus("error");
+      setMessage(error instanceof Error ? `❌ Save failed: ${error.message}` : "❌ Save failed: Unable to save product.");
     } finally {
       setLoading(false);
     }
@@ -318,6 +330,8 @@ export default function ProductAdmin() {
   }
 
   function update<K extends keyof ProductRow>(key: K, value: ProductRow[K]) {
+    setSaveStatus("idle");
+    setLastSavedAt("");
     setSelected((current) => {
       const next = { ...current, [key]: value };
       if (key === "name" && !current.slug) next.slug = slugify(String(value));
@@ -370,14 +384,14 @@ export default function ProductAdmin() {
     <div className="grid gap-8 lg:grid-cols-[20rem_1fr]">
       <aside className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5">
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={loadProducts} disabled={loading} className="rounded-full bg-[#2f7d4b] px-4 py-3 font-black text-white disabled:opacity-60">
+          <button type="button" onClick={() => loadProducts()} disabled={loading} className="rounded-full bg-[#2f7d4b] px-4 py-3 font-black text-white disabled:opacity-60">
             Products
           </button>
           <button type="button" onClick={loadOrders} disabled={loading} className="rounded-full bg-[#183b25] px-4 py-3 font-black text-white disabled:opacity-60">
             Orders
           </button>
         </div>
-        <button type="button" onClick={() => setSelected(blankProduct)} className="mt-3 w-full rounded-full border-2 border-[#2f7d4b] px-4 py-3 font-black text-[#2f7d4b]">
+        <button type="button" onClick={() => { setSelected(blankProduct); setSaveStatus("idle"); setLastSavedAt(""); }} className="mt-3 w-full rounded-full border-2 border-[#2f7d4b] px-4 py-3 font-black text-[#2f7d4b]">
           New product
         </button>
         {products.length > 0 && (
@@ -387,7 +401,7 @@ export default function ProductAdmin() {
               value={selected.id || selected.slug || ""}
               onChange={(event) => {
                 const product = products.find((item) => (item.id || item.slug) === event.target.value);
-                if (product) setSelected(product);
+                if (product) { setSelected(product); setSaveStatus("idle"); setLastSavedAt(""); }
               }}
               className="rounded-xl border border-green-900/20 px-3 py-3 text-sm font-bold normal-case tracking-normal text-[#183b25]"
             >
@@ -396,7 +410,11 @@ export default function ProductAdmin() {
             </select>
           </label>
         )}
-        {message && <p className="mt-4 rounded-xl bg-[#f7f3ea] p-3 text-sm font-semibold text-gray-700">{message}</p>}
+        {message && (
+          <p className={`mt-4 rounded-xl p-3 text-sm font-black ${saveStatus === "saved" ? "bg-green-100 text-green-900 ring-2 ring-green-300" : saveStatus === "error" ? "bg-red-100 text-red-800 ring-2 ring-red-300" : "bg-[#f7f3ea] text-gray-700"}`}>
+            {message}
+          </p>
+        )}
 
         <div className="mt-5 space-y-2">
           <div className="flex items-center justify-between gap-3">
@@ -419,7 +437,7 @@ export default function ProductAdmin() {
                 className="flex cursor-grab items-center gap-2 rounded-xl bg-[#f7f3ea] p-2 text-sm font-bold text-[#183b25] hover:bg-amber-100 active:cursor-grabbing"
               >
                 <span className="shrink-0 text-gray-400" aria-hidden>☰</span>
-                <button type="button" onClick={() => setSelected(product)} className="min-w-0 flex-1 truncate rounded-lg px-2 py-1 text-left hover:bg-white/70">
+                <button type="button" onClick={() => { setSelected(product); setSaveStatus("idle"); setLastSavedAt(""); }} className="min-w-0 flex-1 truncate rounded-lg px-2 py-1 text-left hover:bg-white/70">
                   {product.name || "Untitled"}
                 </button>
                 <span title={visibility.title} className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-wide ring-1 ${visibility.className}`}>
@@ -534,10 +552,15 @@ export default function ProductAdmin() {
               </label>
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button type="button" onClick={() => saveProduct()} disabled={loading} className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white disabled:opacity-60">
-              Save product
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <button type="button" onClick={() => saveProduct()} disabled={loading} className={`rounded-full px-6 py-3 font-black text-white disabled:opacity-60 ${saveStatus === "saved" ? "bg-green-700 ring-4 ring-green-200" : saveStatus === "error" ? "bg-red-700 ring-4 ring-red-200" : "bg-[#2f7d4b]"}`}>
+              {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "✓ Saved" : saveStatus === "error" ? "Save failed — try again" : "Save product"}
             </button>
+            {lastSavedAt && saveStatus === "saved" && (
+              <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-black text-green-900 ring-2 ring-green-300">
+                DB confirmed at {lastSavedAt}
+              </span>
+            )}
             <button type="button" onClick={() => toggleHidden(selected)} disabled={loading || (!selected.id && !selected.name)} className="rounded-full border-2 border-amber-400 px-6 py-3 font-black text-amber-900 disabled:opacity-60">
               {selected.status === "hidden" ? "Unhide product" : "Hide from public view"}
             </button>
