@@ -73,6 +73,31 @@ function normalizeProduct(product: ProductRow): ProductRow {
   };
 }
 
+function productVisibility(product: ProductRow) {
+  if (product.status === "hidden") {
+    return {
+      label: "Hidden",
+      icon: "🙈",
+      title: "Hidden from public view",
+      className: "bg-gray-200 text-gray-700 ring-gray-300",
+    };
+  }
+  if (product.status === "coming_soon") {
+    return {
+      label: "Draft",
+      icon: "🟡",
+      title: "Saved in admin, not shown publicly yet",
+      className: "bg-amber-100 text-amber-900 ring-amber-200",
+    };
+  }
+  return {
+    label: "Live",
+    icon: "🟢",
+    title: `Publicly visible: ${product.status.replace(/_/g, " ")}`,
+    className: "bg-green-100 text-green-800 ring-green-200",
+  };
+}
+
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -360,23 +385,35 @@ export default function ProductAdmin() {
         {message && <p className="mt-4 rounded-xl bg-[#f7f3ea] p-3 text-sm font-semibold text-gray-700">{message}</p>}
 
         <div className="mt-5 space-y-2">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">Drag to sort</p>
-          {products.map((product) => (
-            <div
-              key={product.id || product.slug}
-              draggable
-              onDragStart={() => setDragSlug(product.slug)}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={() => reorder(product.slug)}
-              className="flex cursor-grab items-center gap-2 rounded-xl bg-[#f7f3ea] p-2 text-sm font-bold text-[#183b25] hover:bg-amber-100 active:cursor-grabbing"
-            >
-              <span className="shrink-0 text-gray-400" aria-hidden>☰</span>
-              <button type="button" onClick={() => setSelected(product)} className="min-w-0 flex-1 truncate rounded-lg px-2 py-1 text-left hover:bg-white/70">
-                {product.name || "Untitled"}
-              </button>
-              {product.status === "hidden" && <span className="shrink-0 rounded-full bg-gray-200 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-gray-700">Hidden</span>}
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">Drag to sort</p>
+            <div className="flex flex-wrap justify-end gap-1 text-[10px] font-black uppercase tracking-wide">
+              <span className="rounded-full bg-green-100 px-2 py-1 text-green-800 ring-1 ring-green-200">🟢 Live</span>
+              <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-900 ring-1 ring-amber-200">🟡 Draft</span>
+              <span className="rounded-full bg-gray-200 px-2 py-1 text-gray-700 ring-1 ring-gray-300">🙈 Hidden</span>
             </div>
-          ))}
+          </div>
+          {products.map((product) => {
+            const visibility = productVisibility(product);
+            return (
+              <div
+                key={product.id || product.slug}
+                draggable
+                onDragStart={() => setDragSlug(product.slug)}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => reorder(product.slug)}
+                className="flex cursor-grab items-center gap-2 rounded-xl bg-[#f7f3ea] p-2 text-sm font-bold text-[#183b25] hover:bg-amber-100 active:cursor-grabbing"
+              >
+                <span className="shrink-0 text-gray-400" aria-hidden>☰</span>
+                <button type="button" onClick={() => setSelected(product)} className="min-w-0 flex-1 truncate rounded-lg px-2 py-1 text-left hover:bg-white/70">
+                  {product.name || "Untitled"}
+                </button>
+                <span title={visibility.title} className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-wide ring-1 ${visibility.className}`}>
+                  <span aria-hidden>{visibility.icon}</span> {visibility.label}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </aside>
 
