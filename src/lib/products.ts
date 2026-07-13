@@ -1,4 +1,5 @@
 import { PRODUCTS, type HomesteadProduct } from "@/content/products";
+import { SITE_CONFIG } from "@/lib/config";
 import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { formatPrice } from "@/lib/money";
 import { getSupabaseServerClient } from "@/lib/supabase";
@@ -30,6 +31,10 @@ export function productPriceLabel(priceCents: number, fallback?: string) {
   return priceCents > 0 ? formatPrice(priceCents) : fallback || "Contact for pricing";
 }
 
+export function defaultVenmoUrl() {
+  return SITE_CONFIG.venmoHandle ? `https://venmo.com/${SITE_CONFIG.venmoHandle}` : undefined;
+}
+
 function isPublicProduct(row: { status?: string }) {
   return row.status !== "hidden" && row.status !== "coming_soon";
 }
@@ -59,7 +64,7 @@ export function rowToProduct(row: ProductRow): HomesteadProduct {
     soldOutMessage: row.sold_out_message,
     featured: row.featured,
     paypalUrl: row.paypal_url || undefined,
-    venmoUrl: row.venmo_url || undefined,
+    venmoUrl: row.venmo_url || defaultVenmoUrl(),
   };
 }
 

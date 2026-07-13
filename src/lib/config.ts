@@ -11,6 +11,7 @@ export const SITE_CONFIG = {
   siteUrl: envValue(process.env.NEXT_PUBLIC_SITE_URL, "https://stiffler-homestead.vercel.app"),
   amazonTag: "stifflerhom01-20",
   contactEmail: envValue(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "Jeremystiffler@gmail.com"),
+  venmoHandle: envValue(process.env.NEXT_PUBLIC_VENMO_HANDLE, "stiffler-homestead"),
   youtubeUrl: "https://www.youtube.com/@stifflerhomestead",
   youtubeSubscribeUrl: "https://www.youtube.com/@stifflerhomestead?sub_confirmation=1",
   supplyGuideUrl: "https://homestead-supply-guide.vercel.app",

@@ -17,7 +17,8 @@ function briefDescription(description: string) {
 export default function ProductOrderCard({ product }: { product: HomesteadProduct }) {
   const orderable = isProductOrderable(product);
   const paidCheckoutReady = orderable && product.priceCents > 0;
-  const venmoReady = paidCheckoutReady && Boolean(product.venmoUrl);
+  const defaultVenmoUrl = SITE_CONFIG.venmoHandle ? `https://venmo.com/${SITE_CONFIG.venmoHandle}` : "";
+  const venmoReady = paidCheckoutReady && Boolean(product.venmoUrl || defaultVenmoUrl);
   const [quantity, setQuantity] = useState(orderable ? 1 : 0);
   const [loadingPayment, setLoadingPayment] = useState<"stripe" | "venmo" | null>(null);
   const [error, setError] = useState("");
@@ -139,7 +140,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
               </button>
               {venmoReady && (
                 <button type="button" onClick={payWithVenmo} disabled={Boolean(loadingPayment)} className="w-full rounded-full border-2 border-[#3d95ce] bg-white px-5 py-3 text-center font-black text-[#2675a9] hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-60">
-                  {loadingPayment === "venmo" ? "Opening Venmo..." : "Pay with Venmo"}
+                  {loadingPayment === "venmo" ? "Opening Venmo..." : `Pay with Venmo @${SITE_CONFIG.venmoHandle}`}
                 </button>
               )}
               {venmoReady && <p className="text-center text-xs font-semibold leading-5 text-gray-500">Venmo orders stay pending until we confirm payment, then inventory updates.</p>}

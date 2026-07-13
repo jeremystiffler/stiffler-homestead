@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
+import { SITE_CONFIG } from "@/lib/config";
 import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
+
+function buildVenmoPaymentUrl(baseUrl: string, amountCents: number, note: string) {
+  const cleaned = baseUrl.trim();
+  const url = new URL(cleaned.startsWith("@") ? `https://venmo.com/${cleaned.slice(1)}` : cleaned.startsWith("http") ? cleaned : `https://venmo.com/${cleaned}`);
+  url.searchParams.set("txn", "pay");
+  url.searchParams.set("amount", (amountCents / 100).toFixed(2));
+  url.searchParams.set("note", note);
+  return url.toString();
+}
 
 export async function POST(request: Request) {
   const supabase = getSupabaseServerClient();
@@ -36,8 +46,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "This product does not have checkout pricing yet." }, { status: 400 });
   }
 
-  const paymentUrl = provider === "paypal" ? product.paypal_url : product.venmo_url;
+  const defaultVenmoUrl = SITE_CONFIG.venmoHandle ? `https://venmo.com/${SITE_CONFIG.venmoHandle}` : "";
+  const paymentUrl = provider === "paypal" ? product.paypal_url : product.venmo_url || defaultVenmoUrl;
   if (!paymentUrl) return NextResponse.json({ error: `${provider} is not configured for this product.` }, { status: 400 });
+  const finalPaymentUrl = provider === "venmo"
+    ? buildVenmoPaymentUrl(paymentUrl, product.price_cents * quantity, `Stiffler Homestead order: ${quantity} ${product.unit_label} ${product.name}`)
+    : paymentUrl;
 
   const { data: order, error: orderError } = await supabase
     .from("homestead_orders")
@@ -57,5 +71,5 @@ export async function POST(request: Request) {
     .single();
 
   if (orderError) return NextResponse.json({ error: orderError.message }, { status: 500 });
-  return NextResponse.json({ order, paymentUrl });
+  return NextResponse.json({ order, paymentUrl: finalPaymentUrl });
 }
