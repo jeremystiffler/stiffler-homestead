@@ -193,6 +193,7 @@ export default function ProductAdmin() {
         slug: productToSave.slug || slugify(productToSave.name),
         description: productToSave.description || suggestedDescription(productToSave),
         image_alt: productToSave.image_alt || productToSave.name,
+        unit_label: productToSave.unit_label?.trim() || "items",
       };
       const response = await fetch("/api/admin/products", {
         method: "POST",
@@ -410,7 +411,7 @@ export default function ProductAdmin() {
                   className="rounded-xl border border-green-900/20 px-4 py-3 font-medium"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-black text-[#183b25]">Available quantity
+              <label className="grid gap-2 text-sm font-black text-[#183b25]">Available quantity number
                 <input
                   type="number"
                   min="0"
@@ -419,8 +420,15 @@ export default function ProductAdmin() {
                   onChange={(event) => update("available_quantity", Number(event.target.value))}
                   className="rounded-xl border border-green-900/20 px-4 py-3 font-medium disabled:bg-gray-100 disabled:text-gray-400"
                 />
+                <span className="text-xs font-semibold leading-5 text-gray-500">Use this as the count, then describe what one count means in the Quantity label field.</span>
               </label>
-              <Field label="Unit label" value={selected.unit_label} onChange={(value) => update("unit_label", value)} />
+              <Field
+                label="Quantity label"
+                value={selected.unit_label}
+                onChange={(value) => update("unit_label", value)}
+                placeholder="dozen, half lamb, whole chicken, jar"
+                helper="Shown beside the number on the storefront, like “1 dozen available” or “1 half lamb available”."
+              />
               <Field label="Fallback emoji" value={selected.image_emoji || ""} onChange={(value) => update("image_emoji", value)} />
               <Field label="Price note" value={selected.price_note || ""} onChange={(value) => update("price_note", value)} />
               <Field label="PayPal URL" value={selected.paypal_url || ""} onChange={(value) => update("paypal_url", value)} />
@@ -506,10 +514,11 @@ export default function ProductAdmin() {
   );
 }
 
-function Field({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
+function Field({ label, value, onChange, type = "text", placeholder, helper }: { label: string; value: string; onChange: (value: string) => void; type?: string; placeholder?: string; helper?: string }) {
   return (
     <label className="grid gap-2 text-sm font-black text-[#183b25]">{label}
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
+      <input type={type} value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
+      {helper && <span className="text-xs font-semibold leading-5 text-gray-500">{helper}</span>}
     </label>
   );
 }

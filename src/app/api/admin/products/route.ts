@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     description: body.description || "",
     price_cents: Math.max(0, Number(body.price_cents || 0)),
     price_note: body.price_note || null,
-    unit_label: body.unit_label || "items",
+    unit_label: String(body.unit_label || "").trim() || "items",
     available_quantity: Math.max(0, Number(body.available_quantity || 0)),
     infinite_quantity: Boolean(body.infinite_quantity),
     status: body.status || "coming_soon",
