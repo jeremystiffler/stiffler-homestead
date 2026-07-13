@@ -249,8 +249,17 @@ export default function ProductAdmin() {
         cache: "no-store",
         body: JSON.stringify(normalized),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Unable to save product.");
+      const responseText = await response.text();
+      let data: { product?: ProductRow; error?: string; details?: string; hint?: string } = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        data = { error: responseText || "Unable to save product." };
+      }
+      if (!response.ok) {
+        const detail = [data.error, data.details, data.hint].filter(Boolean).join(" — ");
+        throw new Error(detail || `Unable to save product. Server returned ${response.status}.`);
+      }
       const savedProduct = normalizeProduct({ ...normalized, ...(data.product || {}), infinite_quantity: data.product?.infinite_quantity ?? normalized.infinite_quantity });
       setSelected(savedProduct);
       setProducts((currentProducts) => {

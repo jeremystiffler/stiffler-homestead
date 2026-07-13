@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 
   const requestedInfiniteQuantity = toBoolean(body.infinite_quantity ?? body.infiniteQuantity ?? existingProduct?.infinite_quantity);
   const status = String(body.status ?? existingProduct?.status ?? "coming_soon");
-  const row = {
+  const baseRow: Record<string, unknown> = {
     slug: String(body.slug ?? existingProduct?.slug ?? slugify(name)),
     name,
     category: body.category ?? existingProduct?.category ?? "Meat chickens",
@@ -81,17 +81,41 @@ export async function POST(request: Request) {
     image_emoji: body.image_emoji ?? existingProduct?.image_emoji ?? "🌱",
     sold_out_message: body.sold_out_message ?? existingProduct?.sold_out_message ?? "Sold out. Contact us for next availability.",
     featured: status === "hidden" ? false : toBoolean(body.featured ?? existingProduct?.featured),
-    paypal_url: body.paypal_url ?? existingProduct?.paypal_url ?? null,
-    venmo_url: body.venmo_url ?? existingProduct?.venmo_url ?? null,
     sort_order: Number(body.sort_order ?? existingProduct?.sort_order ?? 100),
   };
-  const saveQuery = productId
-    ? supabase.from("homestead_products").update(row).eq("id", productId)
-    : supabase.from("homestead_products").upsert(row, { onConflict: "slug" });
 
-  const { data: savedProduct, error: saveError } = await saveQuery.select("id,slug").single();
+  // Production can lag the app schema for optional payment columns. Do not include
+  // columns returned by newer forms unless the current DB row already has them.
+  const optionalColumns = ["paypal_url", "venmo_url"];
+  for (const column of optionalColumns) {
+    if (Object.prototype.hasOwnProperty.call(body, column) || Object.prototype.hasOwnProperty.call(existingProduct || {}, column)) {
+      baseRow[column] = body[column] ?? existingProduct?.[column] ?? null;
+    }
+  }
 
-  if (saveError) return jsonNoStore({ error: saveError.message }, { status: 500 });
+  const saveProductRow = (rowToSave: Record<string, unknown>) => {
+    const saveQuery = productId
+      ? supabase.from("homestead_products").update(rowToSave).eq("id", productId)
+      : supabase.from("homestead_products").upsert(rowToSave, { onConflict: "slug" });
+    return saveQuery.select("id,slug").single();
+  };
+
+  let { data: savedProduct, error: saveError } = await saveProductRow(baseRow);
+
+  // If Supabase rejects an optional column because the production schema does not
+  // have it yet, retry without those columns so core fields still save.
+  if (saveError && /column|schema cache/i.test(saveError.message || "")) {
+    const fallbackRow = { ...baseRow };
+    for (const column of optionalColumns) delete fallbackRow[column];
+    const fallbackResult = await saveProductRow(fallbackRow);
+    savedProduct = fallbackResult.data;
+    saveError = fallbackResult.error;
+  }
+
+  if (saveError) {
+    console.error("Product admin save failed", { message: saveError.message, code: saveError.code, details: saveError.details, hint: saveError.hint });
+    return jsonNoStore({ error: saveError.message, details: saveError.details, hint: saveError.hint }, { status: 500 });
+  }
   if (!savedProduct) return jsonNoStore({ error: "Product save did not return a saved row." }, { status: 500 });
 
   const readbackQuery = supabase.from("homestead_products").select("*").limit(1);
