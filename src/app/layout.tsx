@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Cabin, Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Analytics } from "@vercel/analytics/next";
@@ -8,6 +8,7 @@ import SubscribePopup from "@/components/SubscribePopup";
 import { SITE_CONFIG } from "@/lib/config";
 
 const inter = Inter({ subsets: ["latin"] });
+const cabin = Cabin({ subsets: ["latin"], weight: ["700"] });
 const siteUrl = SITE_CONFIG.siteUrl;
 
 export const metadata: Metadata = {
@@ -51,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 🐓
                 <span className="absolute -right-1 -top-1 text-sm">🌿</span>
               </span>
-              <span className="truncate text-base tracking-tight sm:text-lg">Stiffler Homestead</span>
+              <span className={`${cabin.className} truncate text-base tracking-tight sm:text-lg`}>Stiffler Homestead</span>
             </Link>
             <div className="flex w-full flex-wrap items-center gap-2 rounded-full border border-green-900/10 bg-white/70 p-1 text-xs font-bold text-gray-700 shadow-sm sm:w-auto sm:justify-end sm:text-sm">
               <Link href="/products" className="rounded-full bg-[#2f7d4b] px-4 py-2 text-white shadow-sm">Storefront</Link>
