@@ -52,6 +52,7 @@ export default async function ProductsPage() {
           category: product.category,
           offers: {
             "@type": "Offer",
+            price: product.priceCents > 0 ? (product.priceCents / 100).toFixed(2) : undefined,
             priceCurrency: "USD",
             availability: product.infiniteQuantity || product.availableQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             url: `${SITE_CONFIG.siteUrl}/products#${product.slug}`,

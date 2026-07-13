@@ -101,9 +101,15 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
               {product.imageEmoji || "🌱"}
             </div>
           )}
-          <div>
+          <div className="min-w-0 flex-1">
             <h3 className="text-2xl font-black leading-tight text-[#183b25]">{product.name}</h3>
-            <p className="mt-2 text-sm leading-6 text-gray-700">{briefDescription(product.description)}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-amber-300 px-4 py-2 text-lg font-black leading-none text-[#183b25] shadow-sm">
+                {product.priceLabel}
+              </span>
+              {product.priceNote && <span className="text-sm font-bold text-gray-600">{product.priceNote}</span>}
+            </div>
+            <p className="mt-3 text-sm leading-6 text-gray-700">{briefDescription(product.description)}</p>
           </div>
         </div>
 
