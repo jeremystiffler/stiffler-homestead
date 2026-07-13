@@ -23,6 +23,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
   const [loadingPayment, setLoadingPayment] = useState<"stripe" | "venmo" | null>(null);
   const [error, setError] = useState("");
   const infiniteQuantity = Boolean(product.infiniteQuantity);
+  const hasQuantityCap = !infiniteQuantity;
   const max = Math.max(product.availableQuantity, 0);
 
   const mailtoHref = useMemo(() => {
@@ -111,7 +112,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2f7d4b]">Quantity</p>
               <p className="mt-1 font-bold text-[#183b25]">
-                {orderable ? infiniteQuantity ? `${product.unitLabel} available weekly` : `${max} ${product.unitLabel} available` : "Subscribe for new availability"}
+                {orderable ? infiniteQuantity ? `Order any quantity of ${product.unitLabel}` : `${max} ${product.unitLabel} available` : "Subscribe for new availability"}
               </p>
             </div>
             {orderable && (
@@ -119,17 +120,19 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                 id={`quantity-${product.slug}`}
                 aria-label={`Quantity for ${product.name}`}
                 type="number"
+                inputMode="numeric"
                 min={1}
-                max={infiniteQuantity ? undefined : max}
+                max={hasQuantityCap ? max : undefined}
                 value={quantity}
                 onChange={(event) => {
                   const next = Number(event.target.value);
-                  setQuantity(Number.isNaN(next) ? 1 : infiniteQuantity ? Math.max(Math.floor(next), 1) : Math.min(Math.max(Math.floor(next), 1), max));
+                  setQuantity(Number.isNaN(next) ? 1 : hasQuantityCap ? Math.min(Math.max(Math.floor(next), 1), max) : Math.max(Math.floor(next), 1));
                 }}
                 className="w-24 rounded-xl border border-green-900/20 bg-white px-3 py-2 text-center text-lg font-black text-[#183b25] outline-none focus:border-[#2f7d4b]"
               />
             )}
           </div>
+          {orderable && infiniteQuantity && <p className="mt-3 text-xs font-semibold leading-5 text-gray-600">No inventory cap is applied to this item — choose however many you want for local pickup.</p>}
         </div>
 
         <div className="mt-5">

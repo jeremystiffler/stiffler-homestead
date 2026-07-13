@@ -51,7 +51,7 @@ export default async function ProductsPage() {
           offers: {
             "@type": "Offer",
             priceCurrency: "USD",
-            availability: product.availableQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            availability: product.infiniteQuantity || product.availableQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             url: `${SITE_CONFIG.siteUrl}/products#${product.slug}`,
           },
         },
