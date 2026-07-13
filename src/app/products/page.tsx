@@ -3,8 +3,8 @@ import { getAllProducts } from "@/lib/products";
 import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata = {
-  title: "Stiffler Homestead Storefront | Local Pickup Near Lexington KY",
-  description: "Order local Stiffler Homestead food for scheduled pickup near Lexington, Kentucky. Choose a product, select quantity, pay, and schedule pickup.",
+  title: "Farm Fresh Eggs & Pasture-Raised Chicken Near Lexington KY",
+  description: "Order local farm food from Stiffler Homestead for scheduled pickup near Lexington, Kentucky: farm-fresh eggs, pasture-raised meat chickens, seasonal lamb, and homestead food.",
   alternates: { canonical: "/products" },
 };
 
@@ -14,6 +14,7 @@ const productFaqs = [
   ["Is this local pickup only?", "Yes. Stiffler Homestead storefront orders are for local customers near Lexington, Kentucky. We do not offer delivery or shipping through this storefront."],
   ["How do I buy?", "Choose a product, select the quantity, enter your contact info, and pay with the available checkout option. We will coordinate a pickup time after your order is confirmed."],
   ["Where do I pick up?", "Pickup is scheduled locally near Lexington, KY. Exact timing and pickup details are confirmed after purchase or reservation."],
+  ["Can I get notified when eggs, chicken, or lamb are available?", "Yes. Subscribe for farm product and pickup-opening updates so you hear when limited local food batches are listed."],
 ];
 
 const testimonials = [
@@ -62,6 +63,24 @@ export default async function ProductsPage() {
     },
     {
       "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": `${SITE_CONFIG.siteUrl}/#localbusiness`,
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.siteUrl,
+      email: SITE_CONFIG.contactEmail,
+      priceRange: "$$",
+      description: "Local farm food pickup near Lexington, KY, including farm-fresh eggs, pasture-raised meat chickens, seasonal lamb, and homestead food when available.",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Lexington",
+        addressRegion: "KY",
+        addressCountry: "US",
+      },
+      areaServed: SITE_CONFIG.areaServed.map((name) => ({ "@type": "Place", name })),
+      sameAs: [SITE_CONFIG.youtubeUrl],
+    },
+    {
+      "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: productFaqs.map(([question, answer]) => ({
         "@type": "Question",
@@ -80,7 +99,7 @@ export default async function ProductsPage() {
           Local food from our homestead, available for scheduled pickup near Lexington, KY.
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-white/80">
-          We raise and offer seasonal homestead food for local families. Browse what is currently listed, choose your quantity, pay or reserve, and we will schedule a local pickup time with you.
+          We raise and offer seasonal homestead food for Lexington-area families, including farm-fresh eggs, pasture-raised meat chickens, seasonal lamb, and limited local food batches. Browse what is currently listed, choose your quantity, pay or reserve, and we will schedule a local pickup time with you.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a href={`mailto:${SITE_CONFIG.contactEmail}`} className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">

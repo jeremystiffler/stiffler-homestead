@@ -45,6 +45,24 @@ export default async function HomePage() {
     },
     {
       "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": `${SITE_CONFIG.siteUrl}/#localbusiness`,
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.siteUrl,
+      email: SITE_CONFIG.contactEmail,
+      priceRange: "$$",
+      description: "Local farm food pickup near Lexington, KY, including farm-fresh eggs, pasture-raised meat chickens, seasonal lamb, and family homesteading field notes.",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Lexington",
+        addressRegion: "KY",
+        addressCountry: "US",
+      },
+      areaServed: SITE_CONFIG.areaServed.map((name) => ({ "@type": "Place", name })),
+      sameAs: [SITE_CONFIG.youtubeUrl],
+    },
+    {
+      "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: homepageFaqs.map((faq) => ({
         "@type": "Question",
