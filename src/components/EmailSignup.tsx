@@ -113,7 +113,7 @@ export default function EmailSignup({
             </fieldset>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button className="rounded-full bg-amber-300 px-6 py-3 font-black text-[#183b25] transition hover:bg-amber-200">
+              <button type="submit" className="rounded-full bg-amber-300 px-6 py-3 font-black text-[#183b25] transition hover:bg-amber-200">
                 Subscribe by email
               </button>
               <a
