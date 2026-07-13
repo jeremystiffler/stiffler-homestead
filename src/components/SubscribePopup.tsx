@@ -21,7 +21,7 @@ export default function SubscribePopup({ className = "", label = "Subscribe", fl
         className={
           className ||
           (floating
-            ? "fixed bottom-5 right-5 z-50 rounded-full bg-red-600 px-5 py-3 font-black text-white shadow-2xl shadow-green-900/20 transition hover:-translate-y-0.5 hover:bg-red-700"
+            ? "subscribe-floating-button fixed bottom-5 right-5 z-50 rounded-full bg-red-600 px-6 py-4 text-base font-black text-white shadow-2xl shadow-green-900/20 transition hover:-translate-y-0.5 hover:bg-red-700 sm:bottom-7 sm:right-7 sm:px-7 sm:py-4 sm:text-lg"
             : "rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]")
         }
       >
@@ -29,8 +29,8 @@ export default function SubscribePopup({ className = "", label = "Subscribe", fl
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[100] grid place-items-center bg-[#183b25]/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Subscribe to Stiffler Homestead">
-          <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] bg-[#f7f3ea] p-3 shadow-2xl">
+        <div className="fixed inset-0 z-[100] grid items-start justify-items-center overflow-y-auto bg-[#183b25]/75 p-4 pt-6 backdrop-blur-sm sm:pt-10" role="dialog" aria-modal="true" aria-label="Subscribe to Stiffler Homestead">
+          <div className="max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-y-auto rounded-[2rem] bg-[#f7f3ea] p-3 shadow-2xl sm:max-h-[calc(100vh-5rem)]">
             <div className="rounded-[1.5rem] bg-white p-4 sm:p-6">
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
