@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { getStripe } from "@/lib/stripe";
 
@@ -32,11 +33,11 @@ export async function POST(request: Request) {
       if (order?.status !== "paid") {
         const { data: product } = await supabase
           .from("homestead_products")
-          .select("infinite_quantity")
+          .select("slug, category, name")
           .eq("id", productId)
           .single();
 
-        if (!product?.infinite_quantity) {
+        if (!isInfiniteQuantityProduct(product || {})) {
           const { error: decrementError } = await supabase.rpc("decrement_homestead_product_inventory", {
             product_id_input: productId,
             quantity_input: quantity,

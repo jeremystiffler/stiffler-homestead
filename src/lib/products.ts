@@ -1,4 +1,5 @@
 import { PRODUCTS, type HomesteadProduct } from "@/content/products";
+import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { formatPrice } from "@/lib/money";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
@@ -34,6 +35,9 @@ function isPublicProduct(row: { status?: string }) {
 }
 
 export function rowToProduct(row: ProductRow): HomesteadProduct {
+  const infiniteQuantity = isInfiniteQuantityProduct(row);
+  const status = infiniteQuantity && row.status === "sold_out" ? "available" : row.status;
+
   return {
     id: row.id,
     slug: row.slug,
@@ -45,8 +49,8 @@ export function rowToProduct(row: ProductRow): HomesteadProduct {
     priceNote: row.price_note || undefined,
     unitLabel: row.unit_label,
     availableQuantity: row.available_quantity,
-    infiniteQuantity: Boolean(row.infinite_quantity),
-    status: !row.infinite_quantity && row.available_quantity <= 0 && (row.status === "available" || row.status === "preorder") ? "sold_out" : row.status,
+    infiniteQuantity,
+    status: !infiniteQuantity && row.available_quantity <= 0 && (status === "available" || status === "preorder") ? "sold_out" : status,
     availabilityWindow: row.availability_window,
     pickupNote: row.pickup_note,
     imageUrl: row.image_url || undefined,
@@ -88,5 +92,5 @@ export async function getProduct(slug: string) {
 }
 
 export function isProductOrderable(product: { status: string; availableQuantity: number; infiniteQuantity?: boolean; priceCents?: number }) {
-  return (product.status === "available" || product.status === "preorder") && (Boolean(product.infiniteQuantity) || product.availableQuantity > 0);
+  return (product.status === "available" || product.status === "preorder") && (isInfiniteQuantityProduct(product) || product.availableQuantity > 0);
 }

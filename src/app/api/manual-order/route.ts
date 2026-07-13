@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
 export async function POST(request: Request) {
@@ -26,7 +27,9 @@ export async function POST(request: Request) {
   if (productError) return NextResponse.json({ error: productError.message }, { status: 500 });
   const product = products?.[0];
   if (!product) return NextResponse.json({ error: "Product not found." }, { status: 404 });
-  if (!["available", "preorder"].includes(product.status) || (!product.infinite_quantity && product.available_quantity < quantity)) {
+  const infiniteQuantity = isInfiniteQuantityProduct(product);
+  const status = infiniteQuantity && product.status === "sold_out" ? "available" : product.status;
+  if (!["available", "preorder"].includes(status) || (!infiniteQuantity && product.available_quantity < quantity)) {
     return NextResponse.json({ error: "That quantity is not available." }, { status: 400 });
   }
   if (!product.price_cents || product.price_cents <= 0) {

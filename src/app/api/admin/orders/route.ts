@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthorized } from "@/lib/adminAuth";
+import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
 
@@ -42,13 +43,13 @@ export async function PATCH(request: Request) {
 
     const { data: product, error: productError } = await supabase
       .from("homestead_products")
-      .select("infinite_quantity")
+      .select("slug, category, name")
       .eq("id", order.product_id)
       .single();
 
     if (productError) return NextResponse.json({ error: productError.message }, { status: 500 });
 
-    if (!product?.infinite_quantity) {
+    if (!isInfiniteQuantityProduct(product || {})) {
       const { error: decrementError } = await supabase.rpc("decrement_homestead_product_inventory", {
         product_id_input: order.product_id,
         quantity_input: order.quantity,

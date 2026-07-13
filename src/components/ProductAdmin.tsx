@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isInfiniteQuantityProduct } from "@/lib/inventory";
 
 type ProductRow = {
   id?: string;
@@ -414,7 +415,7 @@ export default function ProductAdmin() {
                   type="number"
                   min="0"
                   value={String(selected.available_quantity)}
-                  disabled={Boolean(selected.infinite_quantity)}
+                  disabled={isInfiniteQuantityProduct(selected)}
                   onChange={(event) => update("available_quantity", Number(event.target.value))}
                   className="rounded-xl border border-green-900/20 px-4 py-3 font-medium disabled:bg-gray-100 disabled:text-gray-400"
                 />
@@ -449,7 +450,7 @@ export default function ProductAdmin() {
             Feature on homepage
           </label>
           <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f7f3ea] p-4 text-sm font-black text-[#183b25]">
-            <input type="checkbox" checked={Boolean(selected.infinite_quantity)} onChange={(event) => update("infinite_quantity", event.target.checked)} className="mt-1" />
+            <input type="checkbox" checked={isInfiniteQuantityProduct(selected)} onChange={(event) => update("infinite_quantity", event.target.checked)} className="mt-1" />
             <span>
               Infinite quantity / always available
               <span className="mt-1 block text-xs font-semibold leading-5 text-gray-600">Use this for eggs or other products where inventory should not count down after orders.</span>
