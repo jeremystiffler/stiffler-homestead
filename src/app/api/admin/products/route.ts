@@ -25,6 +25,12 @@ export async function GET(request: Request) {
   return NextResponse.json({ products: data || [] });
 }
 
+function toBoolean(value: unknown) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return ["true", "1", "on", "yes"].includes(value.toLowerCase());
+  return Boolean(value);
+}
+
 export async function POST(request: Request) {
   if (!(await isAdminAuthorized(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const supabase = getSupabaseServerClient();
@@ -34,8 +40,8 @@ export async function POST(request: Request) {
   const name = String(body.name || "").trim();
   if (!name) return NextResponse.json({ error: "Product name is required." }, { status: 400 });
 
+  const requestedInfiniteQuantity = toBoolean(body.infinite_quantity ?? body.infiniteQuantity);
   const row = {
-    id: body.id || undefined,
     slug: String(body.slug || slugify(name)),
     name,
     category: body.category || "Meat chickens",
@@ -44,7 +50,7 @@ export async function POST(request: Request) {
     price_note: body.price_note || null,
     unit_label: String(body.unit_label || "").trim() || "items",
     available_quantity: Math.max(0, Number(body.available_quantity || 0)),
-    infinite_quantity: Boolean(body.infinite_quantity),
+    infinite_quantity: requestedInfiniteQuantity,
     status: body.status || "coming_soon",
     availability_window: body.availability_window || "Update availability",
     pickup_note: body.pickup_note || "Local pickup details will be confirmed after purchase.",
@@ -58,14 +64,22 @@ export async function POST(request: Request) {
     sort_order: Number(body.sort_order || 100),
   };
 
-  const saveProduct = (productRow: typeof row) => supabase
-    .from("homestead_products")
-    .upsert(productRow, { onConflict: row.id ? "id" : "slug" })
-    .select("*")
-    .single();
+  const productId = String(body.id || "").trim();
+  const saveQuery = productId
+    ? supabase.from("homestead_products").update(row).eq("id", productId)
+    : supabase.from("homestead_products").upsert(row, { onConflict: "slug" });
 
-  const { data, error } = await saveProduct(row);
+  const { data, error } = await saveQuery.select("*").single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data) return NextResponse.json({ error: "Product save did not return a saved row." }, { status: 500 });
+
+  if (Boolean(data.infinite_quantity) !== requestedInfiniteQuantity) {
+    return NextResponse.json({
+      error: "Product saved, but the infinite quantity value did not persist in the database.",
+      product: data,
+    }, { status: 500 });
+  }
+
   return NextResponse.json({ product: data });
 }
