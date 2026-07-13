@@ -52,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 🐓
                 <span className="absolute -right-1 -top-1 text-sm">🌿</span>
               </span>
-              <span className={`${cabin.className} truncate text-base tracking-tight sm:text-lg`}>Stiffler Homestead</span>
+              <span className={`${cabin.className} truncate text-[2rem] leading-none tracking-tight sm:text-[2.25rem]`}>Stiffler Homestead</span>
             </Link>
             <div className="flex w-full flex-wrap items-center gap-2 rounded-full border border-green-900/10 bg-white/70 p-1 text-xs font-bold text-gray-700 shadow-sm sm:w-auto sm:justify-end sm:text-sm">
               <Link href="/products" className="rounded-full bg-[#2f7d4b] px-4 py-2 text-white shadow-sm">Storefront</Link>
