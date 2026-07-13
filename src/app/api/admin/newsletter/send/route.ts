@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAdminAuthorized } from "@/lib/adminAuth";
 import {
   filterSubscribersByAudience,
   listSubscribers,
@@ -7,11 +8,6 @@ import {
 } from "@/lib/newsletterStore";
 import { SITE_CONFIG } from "@/lib/config";
 
-function isAuthorized(request: Request) {
-  const configuredPassword = process.env.ADMIN_PASSWORD;
-  if (!configuredPassword) return false;
-  return request.headers.get("x-admin-password") === configuredPassword;
-}
 
 function plainTextToHtml(text: string) {
   return text
@@ -51,7 +47,7 @@ async function sendWithResend(to: string[], subject: string, body: string) {
 }
 
 export async function POST(request: Request) {
-  if (!isAuthorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdminAuthorized(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const body = await request.json();

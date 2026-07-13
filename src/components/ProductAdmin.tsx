@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ProductRow = {
   id?: string;
@@ -140,7 +140,6 @@ async function resizeImage(file: File) {
 }
 
 export default function ProductAdmin() {
-  const [password, setPassword] = useState("");
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [selected, setSelected] = useState<ProductRow>(blankProduct);
@@ -154,7 +153,7 @@ export default function ProductAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      const response = await fetch("/api/admin/products", { headers: { "x-admin-password": password } });
+      const response = await fetch("/api/admin/products", {});
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to load products.");
       setProducts(data.products || []);
@@ -170,7 +169,7 @@ export default function ProductAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      const response = await fetch("/api/admin/orders", { headers: { "x-admin-password": password } });
+      const response = await fetch("/api/admin/orders", {});
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to load orders.");
       setOrders(data.orders || []);
@@ -194,7 +193,7 @@ export default function ProductAdmin() {
       };
       const response = await fetch("/api/admin/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-password": password },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(normalized),
       });
       const data = await response.json();
@@ -224,7 +223,7 @@ export default function ProductAdmin() {
     try {
       const response = await fetch(`/api/admin/products/${productId}`, {
         method: "DELETE",
-        headers: { "x-admin-password": password },
+        
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to delete product.");
@@ -254,7 +253,7 @@ export default function ProductAdmin() {
     try {
       const response = await fetch("/api/admin/orders", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-password": password },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId, action }),
       });
       const data = await response.json();
@@ -309,16 +308,18 @@ export default function ProductAdmin() {
     setMessage("Product order saved.");
   }
 
+  useEffect(() => {
+    void loadProducts();
+  }, []);
+
   return (
     <div className="grid gap-8 lg:grid-cols-[20rem_1fr]">
       <aside className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5">
-        <label className="text-sm font-black text-[#183b25]">Admin password</label>
-        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border border-green-900/20 px-4 py-3" />
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button type="button" onClick={loadProducts} disabled={loading || !password} className="rounded-full bg-[#2f7d4b] px-4 py-3 font-black text-white disabled:opacity-60">
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" onClick={loadProducts} disabled={loading} className="rounded-full bg-[#2f7d4b] px-4 py-3 font-black text-white disabled:opacity-60">
             Products
           </button>
-          <button type="button" onClick={loadOrders} disabled={loading || !password} className="rounded-full bg-[#183b25] px-4 py-3 font-black text-white disabled:opacity-60">
+          <button type="button" onClick={loadOrders} disabled={loading} className="rounded-full bg-[#183b25] px-4 py-3 font-black text-white disabled:opacity-60">
             Orders
           </button>
         </div>
@@ -423,13 +424,13 @@ export default function ProductAdmin() {
             Feature on homepage
           </label>
           <div className="mt-6 flex flex-wrap gap-3">
-            <button type="button" onClick={() => saveProduct()} disabled={loading || !password} className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white disabled:opacity-60">
+            <button type="button" onClick={() => saveProduct()} disabled={loading} className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white disabled:opacity-60">
               Save product
             </button>
-            <button type="button" onClick={() => toggleHidden(selected)} disabled={loading || !password || (!selected.id && !selected.name)} className="rounded-full border-2 border-amber-400 px-6 py-3 font-black text-amber-900 disabled:opacity-60">
+            <button type="button" onClick={() => toggleHidden(selected)} disabled={loading || (!selected.id && !selected.name)} className="rounded-full border-2 border-amber-400 px-6 py-3 font-black text-amber-900 disabled:opacity-60">
               {selected.status === "hidden" ? "Unhide product" : "Hide from public view"}
             </button>
-            <button type="button" onClick={() => deleteProduct(selected)} disabled={loading || !password || (!selected.id && !selected.name)} className="rounded-full border-2 border-red-300 px-6 py-3 font-black text-red-700 disabled:opacity-60">
+            <button type="button" onClick={() => deleteProduct(selected)} disabled={loading || (!selected.id && !selected.name)} className="rounded-full border-2 border-red-300 px-6 py-3 font-black text-red-700 disabled:opacity-60">
               Delete product
             </button>
           </div>
@@ -444,7 +445,7 @@ export default function ProductAdmin() {
               <p className="text-sm font-black uppercase tracking-[0.2em] text-[#2f7d4b]">Manual payment orders</p>
               <h2 className="text-2xl font-black text-[#183b25]">Mark PayPal/Venmo orders paid to reduce inventory</h2>
             </div>
-            <button type="button" onClick={loadOrders} disabled={loading || !password} className="rounded-full bg-amber-300 px-4 py-3 font-black text-[#183b25] disabled:opacity-60">Refresh orders</button>
+            <button type="button" onClick={loadOrders} disabled={loading} className="rounded-full bg-amber-300 px-4 py-3 font-black text-[#183b25] disabled:opacity-60">Refresh orders</button>
           </div>
           <div className="mt-5 grid gap-3">
             {orders.length === 0 && <p className="rounded-2xl bg-[#f7f3ea] p-4 text-sm font-semibold text-gray-600">No orders loaded yet.</p>}

@@ -33,7 +33,6 @@ function downloadCsv(subscribers: Subscriber[]) {
 }
 
 export default function NewsletterAdmin() {
-  const [password, setPassword] = useState("");
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [audience, setAudience] = useState("all");
   const [subject, setSubject] = useState("");
@@ -53,7 +52,7 @@ export default function NewsletterAdmin() {
     setLoading(true);
     setNotice("");
     try {
-      const response = await fetch("/api/admin/newsletter/subscribers", { headers: { "x-admin-password": password } });
+      const response = await fetch("/api/admin/newsletter/subscribers", {});
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to load subscribers.");
       setSubscribers(data.subscribers || []);
@@ -72,7 +71,7 @@ export default function NewsletterAdmin() {
     try {
       const response = await fetch("/api/admin/newsletter/send", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-password": password },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subject, message, audience }),
       });
       const data = await response.json();
@@ -101,9 +100,7 @@ export default function NewsletterAdmin() {
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[18rem_1fr]">
         <aside className="rounded-2xl bg-[#f7f3ea] p-4">
-          <label className="text-sm font-black text-[#183b25]">Admin password</label>
-          <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border border-green-900/20 px-4 py-3" />
-          <button type="button" onClick={loadSubscribers} disabled={loading || !password} className="mt-3 w-full rounded-full bg-[#2f7d4b] px-4 py-3 font-black text-white disabled:opacity-60">
+          <button type="button" onClick={loadSubscribers} disabled={loading} className="w-full rounded-full bg-[#2f7d4b] px-4 py-3 font-black text-white disabled:opacity-60">
             Load subscribers
           </button>
           <button type="button" onClick={() => downloadCsv(subscribers)} disabled={!subscribers.length} className="mt-2 w-full rounded-full bg-amber-300 px-4 py-3 font-black text-[#183b25] disabled:opacity-60">
@@ -135,7 +132,7 @@ export default function NewsletterAdmin() {
                 Message
                 <textarea value={message} onChange={(event) => setMessage(event.target.value)} rows={8} className="rounded-xl border border-green-900/20 px-4 py-3" placeholder="Write the email exactly how you want it sent." />
               </label>
-              <button type="button" onClick={sendNewsletter} disabled={loading || !password || !subject || !message || audienceCount === 0} className="rounded-full bg-[#183b25] px-5 py-3 font-black text-white disabled:opacity-60">
+              <button type="button" onClick={sendNewsletter} disabled={loading || !subject || !message || audienceCount === 0} className="rounded-full bg-[#183b25] px-5 py-3 font-black text-white disabled:opacity-60">
                 Send newsletter
               </button>
             </div>

@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
+import { isAdminAuthorized } from "@/lib/adminAuth";
 import { listSubscribers } from "@/lib/newsletterStore";
 
-function isAuthorized(request: Request) {
-  const configuredPassword = process.env.ADMIN_PASSWORD;
-  if (!configuredPassword) return false;
-  return request.headers.get("x-admin-password") === configuredPassword;
-}
 
 export async function GET(request: Request) {
-  if (!isAuthorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdminAuthorized(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const subscribers = await listSubscribers();

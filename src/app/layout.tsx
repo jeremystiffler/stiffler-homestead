@@ -72,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/products">Storefront</Link>
               <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer">YouTube</a>
               <Link href="/disclosure">Disclosure</Link>
+              <Link href="/admin">Admin login</Link>
             </div>
           </div>
         </footer>

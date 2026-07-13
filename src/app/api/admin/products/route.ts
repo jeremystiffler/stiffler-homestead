@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
+import { isAdminAuthorized } from "@/lib/adminAuth";
 import { getSupabaseServerClient } from "@/lib/supabase";
-
-function isAuthorized(request: Request) {
-  const configuredPassword = process.env.ADMIN_PASSWORD;
-  if (!configuredPassword) return false;
-  return request.headers.get("x-admin-password") === configuredPassword;
-}
 
 function slugify(input: string) {
   return input
@@ -16,7 +11,7 @@ function slugify(input: string) {
 }
 
 export async function GET(request: Request) {
-  if (!isAuthorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdminAuthorized(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const supabase = getSupabaseServerClient();
   if (!supabase) return NextResponse.json({ error: "Supabase is not configured yet." }, { status: 503 });
 
@@ -31,7 +26,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!isAuthorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdminAuthorized(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const supabase = getSupabaseServerClient();
   if (!supabase) return NextResponse.json({ error: "Supabase is not configured yet." }, { status: 503 });
 
