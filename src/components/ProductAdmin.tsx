@@ -375,10 +375,10 @@ export default function ProductAdmin() {
 
       <section className="grid gap-8">
         <div className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5 sm:p-8">
-          <div className="mb-6 grid gap-5 md:grid-cols-[16rem_1fr]">
+          <div className="grid gap-5">
             <div>
-              <div className="h-44 overflow-hidden rounded-2xl bg-[#ddf8e8]">
-                {selected.image_url ? <img src={selected.image_url} alt={selected.image_alt || selected.name} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-5xl">{selected.image_emoji || "🌱"}</div>}
+              <div className="overflow-hidden rounded-2xl bg-[#ddf8e8] sm:h-72">
+                {selected.image_url ? <img src={selected.image_url} alt={selected.image_alt || selected.name} className="h-full min-h-56 w-full object-cover" /> : <div className="grid h-56 place-items-center text-5xl sm:h-72">{selected.image_emoji || "🌱"}</div>}
               </div>
               <label className="mt-3 block cursor-pointer rounded-full bg-amber-300 px-4 py-3 text-center text-sm font-black text-[#183b25]">
                 Upload product image
@@ -387,30 +387,21 @@ export default function ProductAdmin() {
               <p className="mt-2 text-xs leading-5 text-gray-500">Images are center-cropped to a consistent 3:2 block for every product card.</p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Name" value={selected.name} onChange={(value) => update("name", value)} />
-              <Field label="Slug (auto-filled)" value={selected.slug} onChange={(value) => update("slug", slugify(value))} />
-              <label className="grid gap-2 text-sm font-black text-[#183b25]">Category
-                <select value={selected.category} onChange={(event) => update("category", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium">
-                  {['Meat chickens','Pork','Lamb','Eggs','Honey'].map((category) => <option key={category}>{category}</option>)}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-black text-[#183b25]">Status
-                <select value={selected.status} onChange={(event) => update("status", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium">
-                  {['available','preorder','sold_out','coming_soon','hidden'].map((status) => <option key={status}>{status}</option>)}
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-black text-[#183b25]">Price
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  inputMode="decimal"
-                  value={priceInput}
-                  onChange={(event) => setPriceInput(event.target.value)}
-                  className="rounded-xl border border-green-900/20 px-4 py-3 font-medium"
-                />
-              </label>
+            <Field label="Name" value={selected.name} onChange={(value) => update("name", value)} />
+
+            <label className="grid gap-2 text-sm font-black text-[#183b25]">Price
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                value={priceInput}
+                onChange={(event) => setPriceInput(event.target.value)}
+                className="rounded-xl border border-green-900/20 px-4 py-3 font-medium"
+              />
+            </label>
+
+            <div className="grid gap-3 rounded-2xl bg-[#f7f3ea] p-4 md:grid-cols-[1fr_auto] md:items-start">
               <label className="grid gap-2 text-sm font-black text-[#183b25]">Available quantity number
                 <input
                   type="number"
@@ -418,52 +409,73 @@ export default function ProductAdmin() {
                   value={String(selected.available_quantity)}
                   disabled={isInfiniteQuantityProduct(selected)}
                   onChange={(event) => update("available_quantity", Number(event.target.value))}
-                  className="rounded-xl border border-green-900/20 px-4 py-3 font-medium disabled:bg-gray-100 disabled:text-gray-400"
+                  className="rounded-xl border border-green-900/20 bg-white px-4 py-3 font-medium disabled:bg-gray-100 disabled:text-gray-400"
                 />
                 <span className="text-xs font-semibold leading-5 text-gray-500">Use this as the count, then describe what one count means in the Quantity label field.</span>
               </label>
-              <Field
-                label="Quantity label"
-                value={selected.unit_label}
-                onChange={(value) => update("unit_label", value)}
-                placeholder="dozen, half lamb, whole chicken, jar"
-                helper="Shown beside the number on the storefront, like “1 dozen available” or “1 half lamb available”."
-              />
-              <Field label="Fallback emoji" value={selected.image_emoji || ""} onChange={(value) => update("image_emoji", value)} />
-              <Field label="Price note" value={selected.price_note || ""} onChange={(value) => update("price_note", value)} />
-              <Field label="PayPal URL" value={selected.paypal_url || ""} onChange={(value) => update("paypal_url", value)} />
-              <Field label="Venmo URL" value={selected.venmo_url || ""} onChange={(value) => update("venmo_url", value)} />
-              <Field label="Image alt text" value={selected.image_alt || ""} onChange={(value) => update("image_alt", value)} />
+              <label className="flex items-start gap-3 rounded-2xl bg-white p-4 text-sm font-black text-[#183b25] md:min-w-64">
+                <input type="checkbox" checked={Boolean(selected.infinite_quantity)} onChange={(event) => update("infinite_quantity", event.target.checked)} className="mt-1" />
+                <span>
+                  Infinite quantity
+                  <span className="mt-1 block text-xs font-semibold leading-5 text-gray-600">Turn this on when inventory should not count down after orders.</span>
+                </span>
+              </label>
+            </div>
+
+            <Field
+              label="Quantity label"
+              value={selected.unit_label}
+              onChange={(value) => update("unit_label", value)}
+              placeholder="dozen, half lamb, whole chicken, jar"
+              helper="Shown beside the number on the storefront, like “1 dozen available” or “1 half lamb available”."
+            />
+
+            <label className="grid gap-2 text-sm font-black text-[#183b25]">Description (auto-suggested, editable)
+              <textarea value={selected.description} onChange={(event) => update("description", event.target.value)} className="min-h-28 rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={() => update("description", suggestedDescription(selected))} className="rounded-full border border-green-900/20 px-3 py-2 text-xs font-black text-[#2f7d4b]">Regenerate description</button>
+              <button type="button" onClick={() => update("slug", slugify(selected.name))} className="rounded-full border border-green-900/20 px-3 py-2 text-xs font-black text-[#2f7d4b]">Regenerate slug</button>
+            </div>
+
+            <label className="grid gap-2 text-sm font-black text-[#183b25]">Status
+              <select value={selected.status} onChange={(event) => update("status", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium">
+                {['available','preorder','sold_out','coming_soon','hidden'].map((status) => <option key={status}>{status}</option>)}
+              </select>
+            </label>
+
+            <label className="grid gap-2 text-sm font-black text-[#183b25]">Pickup note
+              <textarea value={selected.pickup_note} onChange={(event) => update("pickup_note", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
+            </label>
+
+            <label className="grid gap-2 text-sm font-black text-[#183b25]">Sold out message
+              <textarea value={selected.sold_out_message} onChange={(event) => update("sold_out_message", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
+            </label>
+
+            <div className="rounded-2xl border border-green-900/10 p-4">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">Additional product settings</p>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <Field label="Slug (auto-filled)" value={selected.slug} onChange={(value) => update("slug", slugify(value))} />
+                <label className="grid gap-2 text-sm font-black text-[#183b25]">Category
+                  <select value={selected.category} onChange={(event) => update("category", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium">
+                    {['Meat chickens','Pork','Lamb','Eggs','Honey'].map((category) => <option key={category}>{category}</option>)}
+                  </select>
+                </label>
+                <Field label="Price note" value={selected.price_note || ""} onChange={(value) => update("price_note", value)} />
+                <label className="grid gap-2 text-sm font-black text-[#183b25]">Availability window
+                  <textarea value={selected.availability_window} onChange={(event) => update("availability_window", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
+                </label>
+                <Field label="Fallback emoji" value={selected.image_emoji || ""} onChange={(value) => update("image_emoji", value)} />
+                <Field label="Image alt text" value={selected.image_alt || ""} onChange={(value) => update("image_alt", value)} />
+                <Field label="PayPal URL" value={selected.paypal_url || ""} onChange={(value) => update("paypal_url", value)} />
+                <Field label="Venmo URL" value={selected.venmo_url || ""} onChange={(value) => update("venmo_url", value)} />
+              </div>
+              <label className="mt-4 flex items-center gap-3 text-sm font-black text-[#183b25]">
+                <input type="checkbox" checked={selected.featured} onChange={(event) => update("featured", event.target.checked)} />
+                Feature on homepage
+              </label>
             </div>
           </div>
-
-          <label className="grid gap-2 text-sm font-black text-[#183b25]">Description (auto-suggested, editable)
-            <textarea value={selected.description} onChange={(event) => update("description", event.target.value)} className="min-h-28 rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
-          </label>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <button type="button" onClick={() => update("description", suggestedDescription(selected))} className="rounded-full border border-green-900/20 px-3 py-2 text-xs font-black text-[#2f7d4b]">Regenerate description</button>
-            <button type="button" onClick={() => update("slug", slugify(selected.name))} className="rounded-full border border-green-900/20 px-3 py-2 text-xs font-black text-[#2f7d4b]">Regenerate slug</button>
-          </div>
-          <label className="mt-4 grid gap-2 text-sm font-black text-[#183b25]">Availability window
-            <textarea value={selected.availability_window} onChange={(event) => update("availability_window", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
-          </label>
-          <label className="mt-4 grid gap-2 text-sm font-black text-[#183b25]">Pickup note
-            <textarea value={selected.pickup_note} onChange={(event) => update("pickup_note", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
-          </label>
-          <label className="mt-4 grid gap-2 text-sm font-black text-[#183b25]">Sold out message
-            <textarea value={selected.sold_out_message} onChange={(event) => update("sold_out_message", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium" />
-          </label>
-          <label className="mt-4 flex items-center gap-3 text-sm font-black text-[#183b25]">
-            <input type="checkbox" checked={selected.featured} onChange={(event) => update("featured", event.target.checked)} />
-            Feature on homepage
-          </label>
-          <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f7f3ea] p-4 text-sm font-black text-[#183b25]">
-            <input type="checkbox" checked={Boolean(selected.infinite_quantity)} onChange={(event) => update("infinite_quantity", event.target.checked)} className="mt-1" />
-            <span>
-              Infinite quantity
-              <span className="mt-1 block text-xs font-semibold leading-5 text-gray-600">Turn this on for any product you do not want inventory to count down for after orders.</span>
-            </span>
-          </label>
           <div className="mt-6 flex flex-wrap gap-3">
             <button type="button" onClick={() => saveProduct()} disabled={loading} className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white disabled:opacity-60">
               Save product
