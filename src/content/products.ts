@@ -1,4 +1,4 @@
-export type ProductStatus = "available" | "preorder" | "sold_out" | "coming_soon";
+export type ProductStatus = "available" | "preorder" | "sold_out" | "coming_soon" | "hidden";
 export type ProductCategory = "Meat chickens" | "Pork" | "Lamb" | "Eggs" | "Honey";
 
 export interface HomesteadProduct {

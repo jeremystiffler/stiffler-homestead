@@ -209,6 +209,45 @@ export default function ProductAdmin() {
     }
   }
 
+  async function deleteProduct(product: ProductRow) {
+    const productId = product.id;
+    if (!productId) {
+      setSelected(blankProduct);
+      setMessage("Unsaved product cleared.");
+      return;
+    }
+    const ok = window.confirm(`Permanently delete ${product.name || "this product"}? Use Hide instead if you may sell it again later.`);
+    if (!ok) return;
+
+    setLoading(true);
+    setMessage("");
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: "DELETE",
+        headers: { "x-admin-password": password },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to delete product.");
+      setSelected(blankProduct);
+      setMessage("Product permanently deleted.");
+      await loadProducts();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to delete product.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function toggleHidden(product: ProductRow) {
+    const hiding = product.status !== "hidden";
+    await saveProduct({
+      ...product,
+      status: hiding ? "hidden" : "coming_soon",
+      featured: hiding ? false : product.featured,
+    }, true);
+    setMessage(hiding ? "Product hidden from public pages. It stays saved in admin for later." : "Product restored as coming soon. Update status when ready to sell.");
+  }
+
   async function updateOrder(orderId: string, action: string) {
     setLoading(true);
     setMessage("");
@@ -319,6 +358,7 @@ export default function ProductAdmin() {
               <button type="button" onClick={() => setSelected(product)} className="min-w-0 flex-1 truncate rounded-lg px-2 py-1 text-left hover:bg-white/70">
                 {product.name || "Untitled"}
               </button>
+              {product.status === "hidden" && <span className="shrink-0 rounded-full bg-gray-200 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-gray-700">Hidden</span>}
             </div>
           ))}
         </div>
@@ -348,7 +388,7 @@ export default function ProductAdmin() {
               </label>
               <label className="grid gap-2 text-sm font-black text-[#183b25]">Status
                 <select value={selected.status} onChange={(event) => update("status", event.target.value)} className="rounded-xl border border-green-900/20 px-4 py-3 font-medium">
-                  {['available','preorder','sold_out','coming_soon'].map((status) => <option key={status}>{status}</option>)}
+                  {['available','preorder','sold_out','coming_soon','hidden'].map((status) => <option key={status}>{status}</option>)}
                 </select>
               </label>
               <Field label="Price in dollars (25.00 = $25)" type="text" value={selectedPriceDollars} onChange={(value) => update("price_cents", dollarsToCents(value))} />
@@ -382,9 +422,20 @@ export default function ProductAdmin() {
             <input type="checkbox" checked={selected.featured} onChange={(event) => update("featured", event.target.checked)} />
             Feature on homepage
           </label>
-          <button type="button" onClick={() => saveProduct()} disabled={loading || !password} className="mt-6 rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white disabled:opacity-60">
-            Save product
-          </button>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button type="button" onClick={() => saveProduct()} disabled={loading || !password} className="rounded-full bg-[#2f7d4b] px-6 py-3 font-black text-white disabled:opacity-60">
+              Save product
+            </button>
+            <button type="button" onClick={() => toggleHidden(selected)} disabled={loading || !password || (!selected.id && !selected.name)} className="rounded-full border-2 border-amber-400 px-6 py-3 font-black text-amber-900 disabled:opacity-60">
+              {selected.status === "hidden" ? "Unhide product" : "Hide from public view"}
+            </button>
+            <button type="button" onClick={() => deleteProduct(selected)} disabled={loading || !password || (!selected.id && !selected.name)} className="rounded-full border-2 border-red-300 px-6 py-3 font-black text-red-700 disabled:opacity-60">
+              Delete product
+            </button>
+          </div>
+          <p className="mt-3 text-xs leading-5 text-gray-500">
+            Hide keeps the product in admin for later seasons. Delete permanently removes it from the product database.
+          </p>
         </div>
 
         <div className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5 sm:p-8">

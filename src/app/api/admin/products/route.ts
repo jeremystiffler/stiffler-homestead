@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     image_alt: body.image_alt || name,
     image_emoji: body.image_emoji || "🌱",
     sold_out_message: body.sold_out_message || "Sold out. Contact us for next availability.",
-    featured: Boolean(body.featured),
+    featured: body.status === "hidden" ? false : Boolean(body.featured),
     paypal_url: body.paypal_url || null,
     venmo_url: body.venmo_url || null,
     sort_order: Number(body.sort_order || 100),

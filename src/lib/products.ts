@@ -68,7 +68,9 @@ export async function getAllProducts() {
     return PRODUCTS;
   }
 
-  return (data || []).map((row) => rowToProduct(row as ProductRow));
+  return (data || [])
+    .filter((row) => row.status !== "hidden")
+    .map((row) => rowToProduct(row as ProductRow));
 }
 
 export async function getFeaturedProducts() {
