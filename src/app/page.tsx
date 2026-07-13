@@ -70,8 +70,8 @@ export default async function HomePage() {
               <Link href="/products" className="rounded-full bg-[#2f7d4b] px-6 py-3 text-center font-black text-white shadow-lg shadow-green-900/10 hover:bg-[#27683f]">
                 Buy local meat & eggs
               </Link>
-              <Link href="/local-food-lexington-ky" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
-                Local food near Lexington
+              <Link href="/products" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
+                See current availability
               </Link>
               <Link href="/homestead-supplies" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
                 Shop gear guides
@@ -131,7 +131,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 md:min-w-80 md:grid-cols-1">
-            <Link href="/local-food-lexington-ky" className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">Local SEO landing page</Link>
+            <Link href="/products" className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">Meat & eggs availability</Link>
             <Link href="/homestead-supplies" className="rounded-full border border-white/30 px-5 py-3 text-center font-black text-white hover:bg-white/10">Affiliate gear hub</Link>
           </div>
         </div>
