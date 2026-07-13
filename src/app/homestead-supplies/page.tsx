@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import GearGuideSearch from "@/components/GearGuideSearch";
+import { GEAR_ITEMS } from "@/content/gearItems";
 import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -67,9 +69,9 @@ const monetizationFaqs = [
       "No. Affiliate links can support Stiffler Homestead at no extra cost to you when you buy through a qualifying link.",
   },
   {
-    question: "Why use Amazon search links instead of only exact products?",
+    question: "Why use specific item links instead of broad search links?",
     answer:
-      "Search links stay useful when inventory changes. They help readers compare current prices, reviews, and sizes while still crediting the Stiffler Homestead affiliate tag.",
+      "Specific links make the recommendation clearer and keep the affiliate credit attached to the exact item we mean. If an item changes, Jeremy can update it in the gear item data file.",
   },
   {
     question: "How do these guides connect to the videos?",
@@ -89,6 +91,18 @@ export default function HomesteadSuppliesPage() {
       description:
         "Affiliate-supported homestead supply guides and family technology resources from Stiffler Homestead.",
       isPartOf: { "@type": "WebSite", name: SITE_CONFIG.name, url: SITE_CONFIG.siteUrl },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "Stiffler Homestead recommended gear list",
+      itemListElement: GEAR_ITEMS.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: item.affiliateUrl,
+        name: item.name,
+        description: item.recommendation,
+      })),
     },
     {
       "@context": "https://schema.org",
@@ -123,8 +137,10 @@ export default function HomesteadSuppliesPage() {
       </section>
 
       <section className="mt-10 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-amber-950 sm:p-6">
-        <strong>Affiliate disclosure:</strong> As an Amazon Associate, Stiffler Homestead earns from qualifying purchases. Some links also support us through Wisephone or Covenant Eyes partnerships. The goal is simple: recommend useful tools, not digital snake oil with a coupon code wearing overalls.
+        <strong>Affiliate disclosure:</strong> As an Amazon Associate, Stiffler Homestead earns from qualifying purchases. Some links also support us through Wisephone or Covenant Eyes partnerships. Every item below uses our affiliate link so the homestead gets credit if you buy — no extra cost to you, and no digital snake oil with a coupon code wearing overalls.
       </section>
+
+      <GearGuideSearch items={GEAR_ITEMS} />
 
       <section className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {supplyCategories.map((category) => (
