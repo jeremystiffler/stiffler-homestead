@@ -9,7 +9,9 @@ function bytesToHex(bytes: ArrayBuffer) {
 }
 
 function getConfiguredPassword() {
-  return process.env.ADMIN_PASSWORD || "";
+  const password = process.env.ADMIN_PASSWORD?.trim();
+  if (!password || password === "\"\"" || password === "''") return "";
+  return password;
 }
 
 function readCookie(cookieHeader: string | null, name: string) {

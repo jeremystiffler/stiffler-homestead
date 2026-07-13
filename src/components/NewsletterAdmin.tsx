@@ -38,6 +38,7 @@ export default function NewsletterAdmin() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [notice, setNotice] = useState("");
+  const [lastLoadedAt, setLastLoadedAt] = useState("");
   const [loading, setLoading] = useState(false);
 
   const audienceCount = useMemo(() => {
@@ -52,11 +53,16 @@ export default function NewsletterAdmin() {
     setLoading(true);
     setNotice("");
     try {
-      const response = await fetch("/api/admin/newsletter/subscribers", {});
+      const response = await fetch("/api/admin/newsletter/subscribers", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to load subscribers.");
-      setSubscribers(data.subscribers || []);
-      setNotice(`Loaded ${data.subscribers?.length || 0} subscribers.`);
+      const nextSubscribers = data.subscribers || [];
+      setSubscribers(nextSubscribers);
+      setLastLoadedAt(data.loadedAt || new Date().toISOString());
+      setNotice(`Loaded ${nextSubscribers.length} subscribers.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to load subscribers.");
     } finally {
@@ -107,6 +113,11 @@ export default function NewsletterAdmin() {
             Export CSV
           </button>
           <p className="mt-4 text-sm font-semibold text-gray-700">{subscribers.length} total subscriber(s)</p>
+          {lastLoadedAt && (
+            <p className="mt-2 text-xs font-semibold text-gray-500">
+              Last refreshed {new Date(lastLoadedAt).toLocaleString()}
+            </p>
+          )}
         </aside>
 
         <div className="grid gap-5">

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE, createAdminSessionToken } from "@/lib/adminAuth";
 
 export async function POST(request: Request) {
-  const configuredPassword = process.env.ADMIN_PASSWORD;
-  if (!configuredPassword) {
+  const configuredPassword = process.env.ADMIN_PASSWORD?.trim();
+  if (!configuredPassword || configuredPassword === "\"\"" || configuredPassword === "''") {
     return NextResponse.json({ error: "Admin password is not configured." }, { status: 503 });
   }
 
