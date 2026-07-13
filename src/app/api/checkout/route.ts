@@ -52,32 +52,43 @@ export async function POST(request: Request) {
 
   if (orderError) return NextResponse.json({ error: orderError.message }, { status: 500 });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://stiffler-homestead.vercel.app";
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    customer_email: customerEmail || undefined,
-    success_url: `${siteUrl}/products?checkout=success&order=${order.id}`,
-    cancel_url: `${siteUrl}/products?checkout=cancelled&order=${order.id}`,
-    metadata: {
-      order_id: order.id,
-      product_id: product.id,
-      quantity: String(quantity),
-    },
-    line_items: [
-      {
-        quantity,
-        price_data: {
-          currency: "usd",
-          unit_amount: product.price_cents,
-          product_data: {
-            name: product.name,
-            description: product.description,
-            images: product.image_url ? [product.image_url] : undefined,
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://stifflerhomestead.store";
+  const productImage = typeof product.image_url === "string" && /^https:\/\//.test(product.image_url) && product.image_url.length <= 2048
+    ? product.image_url
+    : undefined;
+
+  let session;
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: customerEmail || undefined,
+      success_url: `${siteUrl}/products?checkout=success&order=${order.id}`,
+      cancel_url: `${siteUrl}/products?checkout=cancelled&order=${order.id}`,
+      metadata: {
+        order_id: order.id,
+        product_id: product.id,
+        quantity: String(quantity),
+      },
+      line_items: [
+        {
+          quantity,
+          price_data: {
+            currency: "usd",
+            unit_amount: product.price_cents,
+            product_data: {
+              name: product.name,
+              description: String(product.description || "").slice(0, 1000),
+              images: productImage ? [productImage] : undefined,
+            },
           },
         },
-      },
-    ],
-  });
+      ],
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Stripe checkout could not be created.";
+    await supabase.from("homestead_orders").update({ status: "cancelled", notes: message }).eq("id", order.id);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 
   await supabase.from("homestead_orders").update({ stripe_session_id: session.id }).eq("id", order.id);
   return NextResponse.json({ url: session.url });
