@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import EmailSignup from "@/components/EmailSignup";
 import { SITE_CONFIG } from "@/lib/config";
+import Link from "next/link";
 
 const siteUrl = SITE_CONFIG.siteUrl;
 const siteName = SITE_CONFIG.name;
@@ -72,6 +73,17 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       </div>
       <div className="prose prose-lg max-w-none rounded-3xl bg-white p-4 shadow-lg shadow-green-900/5 sm:p-6 md:p-8">
         <MDXRemote source={post.content} />
+      </div>
+      <div className="mt-8 grid gap-4 rounded-3xl bg-[#f7f3ea] p-5 md:grid-cols-3">
+        <Link href="/products" className="rounded-2xl bg-white p-5 font-bold text-[#183b25] shadow-sm hover:-translate-y-0.5 hover:shadow-md">
+          Browse the storefront <span className="block pt-2 text-sm font-semibold text-gray-600">See local meat, eggs, seasonal products, and pickup availability from the homestead.</span>
+        </Link>
+        <a href={SITE_CONFIG.youtubeSubscribeUrl} target="_blank" rel="noreferrer" className="rounded-2xl bg-white p-5 font-bold text-[#183b25] shadow-sm hover:-translate-y-0.5 hover:shadow-md">
+          Subscribe on YouTube <span className="block pt-2 text-sm font-semibold text-gray-600">Watch the projects behind these notes and follow the next family homestead experiment.</span>
+        </a>
+        <Link href="/#newsletter" className="rounded-2xl bg-white p-5 font-bold text-[#183b25] shadow-sm hover:-translate-y-0.5 hover:shadow-md">
+          Get email updates <span className="block pt-2 text-sm font-semibold text-gray-600">Choose food availability, new blog posts, YouTube updates, or the whole farm bundle.</span>
+        </Link>
       </div>
       <div className="mt-8 grid gap-4 rounded-3xl bg-[#f7f3ea] p-5 md:grid-cols-2">
         <a href={SITE_CONFIG.wisephoneDiscountUrl} target="_blank" rel="noreferrer" className="rounded-2xl bg-white p-5 font-bold text-[#183b25] shadow-sm hover:-translate-y-0.5 hover:shadow-md">

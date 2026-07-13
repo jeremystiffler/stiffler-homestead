@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/posts";
+import EmailSignup from "@/components/EmailSignup";
+import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata = {
   title: "Stiffler Homestead Blog Posts",
@@ -15,6 +17,11 @@ export default function BlogPage() {
         <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Blog</p>
         <h1 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl md:text-5xl">Stiffler Homestead Blog Posts</h1>
         <p className="mt-4 max-w-3xl text-lg leading-8 text-gray-700">Practical notes from our family homestead: chickens, sheep, composting, kid-friendly farm work, and the simple systems that keep things moving.</p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Link href="/products" className="rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white">Browse the storefront</Link>
+          <a href={SITE_CONFIG.youtubeSubscribeUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] px-5 py-3 text-center font-black text-[#2f7d4b]">Subscribe on YouTube</a>
+          <Link href="/#newsletter" className="rounded-full border-2 border-[#2f7d4b] px-5 py-3 text-center font-black text-[#2f7d4b]">Get email updates</Link>
+        </div>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((post) => (
@@ -29,6 +36,7 @@ export default function BlogPage() {
           </Link>
         ))}
       </div>
+      <EmailSignup className="mt-10" heading="Get new blog posts and food availability" subtext="Pick the updates you want: practical project notes, new videos, and local storefront availability." />
     </div>
   );
 }
