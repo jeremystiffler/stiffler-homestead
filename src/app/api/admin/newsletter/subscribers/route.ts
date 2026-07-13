@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthorized } from "@/lib/adminAuth";
-import { listSubscribers } from "@/lib/newsletterStore";
+import { deleteSubscriber, listSubscribers } from "@/lib/newsletterStore";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +23,23 @@ export async function GET(request: Request) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to load newsletter subscribers." },
       { status: 500, headers: NO_STORE_HEADERS },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  if (!(await isAdminAuthorized(request))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  }
+
+  try {
+    const body = await request.json().catch(() => ({}));
+    const result = await deleteSubscriber(body.email || "");
+    return NextResponse.json({ ok: true, deleted: result }, { headers: NO_STORE_HEADERS });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to delete newsletter subscriber." },
+      { status: 400, headers: NO_STORE_HEADERS },
     );
   }
 }

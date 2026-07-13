@@ -70,6 +70,28 @@ export default function NewsletterAdmin() {
     }
   }
 
+  async function removeSubscriber(email: string) {
+    if (!window.confirm(`Remove ${email} from the subscriber list?`)) return;
+    setLoading(true);
+    setNotice("");
+    try {
+      const response = await fetch("/api/admin/newsletter/subscribers", {
+        method: "DELETE",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to remove subscriber.");
+      setSubscribers((current) => current.filter((subscriber) => subscriber.email !== email));
+      setNotice(`Removed ${email}.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Unable to remove subscriber.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function sendNewsletter() {
     if (!window.confirm(`Send this email to ${audienceCount} subscriber(s)?`)) return;
     setLoading(true);
@@ -157,6 +179,7 @@ export default function NewsletterAdmin() {
                   <th className="p-3">Interests</th>
                   <th className="p-3">Source</th>
                   <th className="p-3">Updated</th>
+                  <th className="p-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,6 +189,16 @@ export default function NewsletterAdmin() {
                     <td className="p-3">{subscriber.interests.join(", ")}</td>
                     <td className="p-3">{subscriber.source}</td>
                     <td className="p-3">{new Date(subscriber.updatedAt).toLocaleString()}</td>
+                    <td className="p-3">
+                      <button
+                        type="button"
+                        onClick={() => removeSubscriber(subscriber.email)}
+                        disabled={loading}
+                        className="rounded-full border border-red-200 px-3 py-1 text-xs font-black text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        Remove
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
