@@ -17,6 +17,10 @@ function statusClasses(product: HomesteadProduct) {
   return "bg-gray-200 text-gray-700";
 }
 
+function formatDollars(cents: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+}
+
 export default function ProductOrderCard({ product }: { product: HomesteadProduct }) {
   const orderable = isProductOrderable(product);
   const paidCheckoutReady = orderable && product.priceCents > 0;
@@ -24,8 +28,9 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState("");
   const [error, setError] = useState("");
+  const [manualMessage, setManualMessage] = useState("");
   const max = Math.max(product.availableQuantity, 0);
 
   const mailtoHref = useMemo(() => {
@@ -48,38 +53,64 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
     return `mailto:${SITE_CONFIG.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }, [product, quantity]);
 
+  const orderPayload = {
+    productId: product.id,
+    slug: product.slug,
+    quantity,
+    customerEmail,
+    customerName,
+    customerPhone,
+  };
+
   async function startCheckout() {
     setError("");
-    setLoading(true);
+    setManualMessage("");
+    setLoading("stripe");
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: product.id,
-          slug: product.slug,
-          quantity,
-          customerEmail,
-          customerName,
-          customerPhone,
-        }),
+        body: JSON.stringify(orderPayload),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Checkout could not be started.");
       window.location.href = data.url;
     } catch (checkoutError) {
       setError(checkoutError instanceof Error ? checkoutError.message : "Checkout could not be started.");
-      setLoading(false);
+      setLoading("");
+    }
+  }
+
+  async function startManualPayment(provider: "paypal" | "venmo") {
+    setError("");
+    setManualMessage("");
+    setLoading(provider);
+    try {
+      const response = await fetch("/api/manual-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...orderPayload, provider }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `Could not start ${provider} order.`);
+      setManualMessage(`Order saved as pending. Please complete ${provider === "paypal" ? "PayPal" : "Venmo"} payment for ${formatDollars(product.priceCents * quantity)}. Inventory updates after payment is confirmed in admin.`);
+      window.open(data.paymentUrl, "_blank", "noopener,noreferrer");
+    } catch (manualError) {
+      setError(manualError instanceof Error ? manualError.message : `Could not start ${provider} order.`);
+    } finally {
+      setLoading("");
     }
   }
 
   return (
     <article id={product.slug} className="flex h-full flex-col overflow-hidden rounded-3xl border border-green-900/10 bg-white shadow-lg shadow-green-900/5">
-      {product.imageUrl ? (
-        <img src={product.imageUrl} alt={product.imageAlt || product.name} className="h-48 w-full object-cover" />
-      ) : (
-        <div className="grid h-36 place-items-center bg-[#ddf8e8] text-6xl" aria-hidden>{product.imageEmoji}</div>
-      )}
+      <div className="h-48 w-full overflow-hidden bg-[#ddf8e8]">
+        {product.imageUrl ? (
+          <img src={product.imageUrl} alt={product.imageAlt || product.name} className="h-full w-full object-cover" />
+        ) : (
+          <div className="grid h-full place-items-center text-6xl" aria-hidden>{product.imageEmoji}</div>
+        )}
+      </div>
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-start justify-between gap-4">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2f7d4b]">{product.category}</p>
@@ -126,9 +157,13 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                   <input className="rounded-xl border border-green-900/20 px-4 py-3 outline-none focus:border-[#2f7d4b]" placeholder="Name" value={customerName} onChange={(event) => setCustomerName(event.target.value)} />
                   <input className="rounded-xl border border-green-900/20 px-4 py-3 outline-none focus:border-[#2f7d4b]" placeholder="Email for receipt" type="email" value={customerEmail} onChange={(event) => setCustomerEmail(event.target.value)} />
                   <input className="rounded-xl border border-green-900/20 px-4 py-3 outline-none focus:border-[#2f7d4b]" placeholder="Phone for pickup coordination" value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} />
-                  <button type="button" onClick={startCheckout} disabled={loading} className="rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f] disabled:cursor-not-allowed disabled:opacity-60">
-                    {loading ? "Opening checkout..." : "Pay with card / Stripe"}
+                  <button type="button" onClick={startCheckout} disabled={Boolean(loading)} className="rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f] disabled:cursor-not-allowed disabled:opacity-60">
+                    {loading === "stripe" ? "Opening checkout..." : "Pay with card / Stripe"}
                   </button>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {product.paypalUrl && <button type="button" onClick={() => startManualPayment("paypal")} disabled={Boolean(loading)} className="rounded-full border-2 border-[#2f7d4b] px-4 py-2 text-center text-sm font-black text-[#2f7d4b] disabled:opacity-60">{loading === "paypal" ? "Opening PayPal..." : "PayPal"}</button>}
+                    {product.venmoUrl && <button type="button" onClick={() => startManualPayment("venmo")} disabled={Boolean(loading)} className="rounded-full border-2 border-[#2f7d4b] px-4 py-2 text-center text-sm font-black text-[#2f7d4b] disabled:opacity-60">{loading === "venmo" ? "Opening Venmo..." : "Venmo"}</button>}
+                  </div>
                 </div>
               ) : (
                 <a href={mailtoHref} className="mt-4 block rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f]">
@@ -136,13 +171,10 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                 </a>
               )}
 
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {product.paypalUrl && <a href={product.paypalUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] px-4 py-2 text-center text-sm font-black text-[#2f7d4b]">PayPal</a>}
-                {product.venmoUrl && <a href={product.venmoUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] px-4 py-2 text-center text-sm font-black text-[#2f7d4b]">Venmo</a>}
-              </div>
               {error && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-800">{error}</p>}
+              {manualMessage && <p className="mt-3 rounded-xl bg-green-50 p-3 text-sm font-semibold text-green-900">{manualMessage}</p>}
               <p className="mt-3 text-xs leading-5 text-gray-500">
-                Stripe checkout automatically updates inventory after payment. PayPal/Venmo links are manual backup options and should be reconciled by hand.
+                Stripe automatically updates inventory after confirmed payment. PayPal/Venmo orders are saved as pending and reduce inventory after admin payment confirmation.
               </p>
             </>
           ) : (
