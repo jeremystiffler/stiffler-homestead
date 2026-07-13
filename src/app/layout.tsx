@@ -56,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex w-full flex-wrap items-center gap-2 rounded-full border border-green-900/10 bg-white/70 p-1 text-xs font-bold text-gray-700 shadow-sm sm:w-auto sm:justify-end sm:text-sm">
               <Link href="/products" className="rounded-full bg-[#2f7d4b] px-4 py-2 text-white shadow-sm">Storefront</Link>
               <Link href="/blog" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Blog</Link>
+              <SubscribePopup className="rounded-full bg-red-600 px-4 py-2 text-white shadow-sm transition hover:bg-red-700" label="Subscribe" />
             </div>
           </div>
         </nav>
