@@ -16,19 +16,19 @@ const productFaqs = [
 
 const testimonials = [
   {
-    quote: "We love knowing exactly where our food is coming from — and that it is raised by a family right here near Lexington.",
-    name: "Lexington pickup customer",
-    detail: "Local family food",
+    quote: "Know where your food comes from, raised by a family homestead right here near Lexington.",
+    name: "Local pickup promise",
+    detail: "Traceable family food",
   },
   {
-    quote: "The pickup process was simple, personal, and easy to coordinate around our family schedule.",
-    name: "Central Kentucky family",
+    quote: "Order what is actually available, then coordinate pickup details with a real person — not a mystery warehouse.",
+    name: "Simple coordination",
     detail: "Easy local pickup",
   },
   {
-    quote: "It feels good supporting a homestead that is honest about the work, the seasons, and what is actually available.",
-    name: "Returning local buyer",
-    detail: "Seasonal availability",
+    quote: "Support seasonal food that is honest about the work, the timing, and the real limits of a small homestead.",
+    name: "Seasonal and honest",
+    detail: "Real availability",
   },
 ];
 
@@ -120,37 +120,35 @@ export default async function ProductsPage() {
         </div>
       </section>
 
-      <section className="mt-12 overflow-hidden rounded-[2rem] bg-[#fffaf0] shadow-xl shadow-green-900/5 ring-1 ring-green-900/10">
-        <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.9fr_1.4fr] lg:p-10">
-          <div className="flex flex-col justify-between rounded-[1.5rem] bg-[#183b25] p-6 text-white sm:p-8">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.25em] text-amber-300">Local families</p>
-              <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">Kind words from the storefront</h2>
-              <p className="mt-4 leading-8 text-white/80">
-                We keep the storefront intentionally simple: seasonal food, honest availability, and pickup coordination with a real family on the other side.
-              </p>
-            </div>
-            <a href={`mailto:${SITE_CONFIG.contactEmail}?subject=Stiffler%20Homestead%20testimonial`} className="mt-6 inline-flex w-fit rounded-full bg-amber-300 px-5 py-3 font-black text-[#183b25] hover:bg-amber-200">
-              Share your experience
-            </a>
+      <section className="mt-12 overflow-hidden rounded-[2rem] bg-[#fffaf0] p-6 shadow-xl shadow-green-900/5 ring-1 ring-green-900/10 sm:p-8 lg:p-10">
+        <div className="flex flex-col gap-5 rounded-[1.5rem] bg-[#183b25] p-6 text-white sm:flex-row sm:items-end sm:justify-between sm:p-8">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-amber-300">Local families</p>
+            <h2 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">Why local families choose the storefront</h2>
+            <p className="mt-4 max-w-3xl leading-8 text-white/80">
+              We keep the storefront intentionally simple: seasonal food, honest availability, and pickup coordination with a real family on the other side.
+            </p>
           </div>
+          <a href={`mailto:${SITE_CONFIG.contactEmail}?subject=Stiffler%20Homestead%20testimonial`} className="inline-flex shrink-0 rounded-full bg-amber-300 px-5 py-3 font-black text-[#183b25] hover:bg-amber-200">
+            Share your experience
+          </a>
+        </div>
 
-          <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <article key={testimonial.name} className="flex h-full flex-col rounded-3xl bg-white p-6 shadow-lg shadow-green-900/5 ring-1 ring-green-900/10">
-                <div className="flex gap-1 text-amber-400" aria-label="Five star note">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <span key={index}>★</span>
-                  ))}
-                </div>
-                <p className="mt-4 flex-1 text-lg font-bold leading-8 text-[#183b25]">“{testimonial.quote}”</p>
-                <div className="mt-6 border-t border-green-900/10 pt-4">
-                  <p className="font-black text-[#183b25]">{testimonial.name}</p>
-                  <p className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-[#2f7d4b]">{testimonial.detail}</p>
-                </div>
-              </article>
-            ))}
-          </div>
+        <div className="mt-6 grid gap-5 md:grid-cols-3">
+          {testimonials.map((testimonial) => (
+            <article key={testimonial.name} className="flex h-full flex-col rounded-3xl bg-white p-6 shadow-lg shadow-green-900/5 ring-1 ring-green-900/10">
+              <div className="flex gap-1 text-amber-400" aria-label="Five star note">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <span key={index}>★</span>
+                ))}
+              </div>
+              <p className="mt-4 flex-1 text-lg font-bold leading-8 text-[#183b25]">{testimonial.quote}</p>
+              <div className="mt-6 border-t border-green-900/10 pt-4">
+                <p className="font-black text-[#183b25]">{testimonial.name}</p>
+                <p className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-[#2f7d4b]">{testimonial.detail}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
