@@ -65,12 +65,19 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
   }
 
   return (
-    <article id={product.slug} className="flex h-full flex-col rounded-3xl border border-green-900/10 bg-white p-5 shadow-lg shadow-green-900/5 sm:p-6">
-      <div className="flex flex-1 flex-col">
+    <article id={product.slug} className="flex h-full flex-col overflow-hidden rounded-3xl border border-green-900/10 bg-white shadow-lg shadow-green-900/5">
+      {product.imageUrl && (
+        <div className="h-44 overflow-hidden bg-[#ddf8e8]">
+          <img src={product.imageUrl} alt={product.imageAlt || product.name} className="h-full w-full object-cover" />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="flex items-start gap-3">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#ddf8e8] text-2xl" aria-hidden>
-            {product.imageEmoji || "🌱"}
-          </div>
+          {!product.imageUrl && (
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#ddf8e8] text-2xl" aria-hidden>
+              {product.imageEmoji || "🌱"}
+            </div>
+          )}
           <div>
             <h3 className="text-2xl font-black leading-tight text-[#183b25]">{product.name}</h3>
             <p className="mt-2 text-sm leading-6 text-gray-700">{briefDescription(product.description)}</p>

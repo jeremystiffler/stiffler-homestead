@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type ProductRow = {
   id?: string;
@@ -143,11 +143,10 @@ export default function ProductAdmin() {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [selected, setSelected] = useState<ProductRow>(blankProduct);
+  const [priceInput, setPriceInput] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [dragSlug, setDragSlug] = useState("");
-
-  const selectedPriceDollars = useMemo(() => centsToDollars(selected.price_cents), [selected.price_cents]);
 
   async function loadProducts() {
     setLoading(true);
@@ -187,6 +186,7 @@ export default function ProductAdmin() {
     try {
       const normalized = {
         ...productToSave,
+        price_cents: productToSave === selected ? dollarsToCents(priceInput) : productToSave.price_cents,
         slug: productToSave.slug || slugify(productToSave.name),
         description: productToSave.description || suggestedDescription(productToSave),
         image_alt: productToSave.image_alt || productToSave.name,
@@ -312,6 +312,10 @@ export default function ProductAdmin() {
     void loadProducts();
   }, []);
 
+  useEffect(() => {
+    setPriceInput(centsToDollars(selected.price_cents));
+  }, [selected.id, selected.slug]);
+
   return (
     <div className="grid gap-8 lg:grid-cols-[20rem_1fr]">
       <aside className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5">
@@ -392,7 +396,17 @@ export default function ProductAdmin() {
                   {['available','preorder','sold_out','coming_soon','hidden'].map((status) => <option key={status}>{status}</option>)}
                 </select>
               </label>
-              <Field label="Price in dollars (25.00 = $25)" type="text" value={selectedPriceDollars} onChange={(value) => update("price_cents", dollarsToCents(value))} />
+              <label className="grid gap-2 text-sm font-black text-[#183b25]">Price
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={priceInput}
+                  onChange={(event) => setPriceInput(event.target.value)}
+                  className="rounded-xl border border-green-900/20 px-4 py-3 font-medium"
+                />
+              </label>
               <Field label="Available quantity" type="number" value={String(selected.available_quantity)} onChange={(value) => update("available_quantity", Number(value))} />
               <Field label="Unit label" value={selected.unit_label} onChange={(value) => update("unit_label", value)} />
               <Field label="Fallback emoji" value={selected.image_emoji || ""} onChange={(value) => update("image_emoji", value)} />
