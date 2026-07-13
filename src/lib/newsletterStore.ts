@@ -138,6 +138,23 @@ export async function deleteSubscriber(emailInput: string) {
   return { email };
 }
 
+export async function updateSubscriberInterests(emailInput: string, interestsInput: unknown) {
+  const email = normalizeEmail(emailInput);
+  if (!email) throw new Error("Email is required.");
+
+  const interests = normalizeInterests(interestsInput);
+  const file = await readSubscribersFile();
+  const subscriber = file.subscribers.find((item) => item.email === email);
+  if (!subscriber) throw new Error("Subscriber was not found.");
+
+  subscriber.interests = interests;
+  subscriber.status = "subscribed";
+  subscriber.updatedAt = nowIso();
+
+  await writeSubscribersFile(file);
+  return subscriber;
+}
+
 export async function saveCampaign(campaign: NewsletterCampaign) {
   const supabase = await ensureBucket();
   const payload = JSON.stringify(campaign, null, 2);

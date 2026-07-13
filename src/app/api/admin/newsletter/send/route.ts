@@ -6,7 +6,6 @@ import {
   NewsletterInterest,
   saveCampaign,
 } from "@/lib/newsletterStore";
-import { SITE_CONFIG } from "@/lib/config";
 
 
 function plainTextToHtml(text: string) {
@@ -22,8 +21,8 @@ async function sendWithResend(to: string[], subject: string, body: string) {
     throw new Error("RESEND_API_KEY is not configured yet. Add a Resend API key in Vercel to send broadcasts.");
   }
 
-  const from = process.env.NEWSLETTER_FROM_EMAIL || `Stiffler Homestead <newsletter@${new URL(SITE_CONFIG.siteUrl).hostname}>`;
-  const replyTo = process.env.NEWSLETTER_REPLY_TO || SITE_CONFIG.contactEmail;
+  const from = process.env.NEWSLETTER_FROM_EMAIL || "Stiffler Homestead <info@stifflerhomestead.store>";
+  const replyTo = process.env.NEWSLETTER_REPLY_TO || "info@stifflerhomestead.store";
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -88,6 +87,10 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
       error: lastError || undefined,
     });
+
+    if (failedCount && !sentCount) {
+      return NextResponse.json({ error: lastError || "Newsletter failed to send.", campaign }, { status: 502 });
+    }
 
     return NextResponse.json({ campaign });
   } catch (error) {

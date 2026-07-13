@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Subscriber = {
   email: string;
@@ -39,6 +39,7 @@ export default function NewsletterAdmin() {
   const [message, setMessage] = useState("");
   const [notice, setNotice] = useState("");
   const [lastLoadedAt, setLastLoadedAt] = useState("");
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const audienceCount = useMemo(() => {
@@ -49,11 +50,11 @@ export default function NewsletterAdmin() {
     }).length;
   }, [subscribers, audience]);
 
-  async function loadSubscribers() {
+  const loadSubscribers = useCallback(async (selectedAudience = audience) => {
     setLoading(true);
     setNotice("");
     try {
-      const response = await fetch("/api/admin/newsletter/subscribers", {
+      const response = await fetch(`/api/admin/newsletter/subscribers?audience=${encodeURIComponent(selectedAudience)}`, {
         cache: "no-store",
         headers: { "Cache-Control": "no-cache" },
       });
@@ -61,10 +62,36 @@ export default function NewsletterAdmin() {
       if (!response.ok) throw new Error(data.error || "Unable to load subscribers.");
       const nextSubscribers = data.subscribers || [];
       setSubscribers(nextSubscribers);
+      setTotalCount(data.totalCount ?? nextSubscribers.length);
       setLastLoadedAt(data.loadedAt || new Date().toISOString());
-      setNotice(`Loaded ${nextSubscribers.length} subscribers.`);
+      setNotice(`Loaded ${nextSubscribers.length} subscriber(s) for ${selectedAudience === "all" ? "all subscribers" : selectedAudience === "food" ? "farm products" : "videos and updates"}.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to load subscribers.");
+    } finally {
+      setLoading(false);
+    }
+  }, [audience]);
+
+  useEffect(() => {
+    void loadSubscribers(audience);
+  }, [audience, loadSubscribers]);
+
+  async function updateSubscriberLists(email: string, interests: string[]) {
+    setLoading(true);
+    setNotice("");
+    try {
+      const response = await fetch("/api/admin/newsletter/subscribers", {
+        method: "PATCH",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" },
+        body: JSON.stringify({ email, interests }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to update subscriber.");
+      setNotice(`Updated ${email}.`);
+      await loadSubscribers(audience);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Unable to update subscriber.");
     } finally {
       setLoading(false);
     }
@@ -83,7 +110,7 @@ export default function NewsletterAdmin() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to remove subscriber.");
-      setSubscribers((current) => current.filter((subscriber) => subscriber.email !== email));
+      await loadSubscribers(audience);
       setNotice(`Removed ${email}.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to remove subscriber.");
@@ -128,13 +155,14 @@ export default function NewsletterAdmin() {
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[18rem_1fr]">
         <aside className="rounded-2xl bg-[#f7f3ea] p-4">
-          <button type="button" onClick={loadSubscribers} disabled={loading} className="w-full rounded-full bg-[#2f7d4b] px-4 py-3 font-black text-white disabled:opacity-60">
-            Load subscribers
+          <button type="button" onClick={() => loadSubscribers(audience)} disabled={loading} className="w-full rounded-full bg-[#2f7d4b] px-4 py-3 font-black text-white disabled:opacity-60">
+            Refresh selected audience
           </button>
           <button type="button" onClick={() => downloadCsv(subscribers)} disabled={!subscribers.length} className="mt-2 w-full rounded-full bg-amber-300 px-4 py-3 font-black text-[#183b25] disabled:opacity-60">
             Export CSV
           </button>
-          <p className="mt-4 text-sm font-semibold text-gray-700">{subscribers.length} total subscriber(s)</p>
+          <p className="mt-4 text-sm font-semibold text-gray-700">Showing {subscribers.length} of {totalCount} subscriber(s)</p>
+          <p className="mt-1 text-xs font-semibold text-gray-500">Changing the audience below auto-loads that list.</p>
           {lastLoadedAt && (
             <p className="mt-2 text-xs font-semibold text-gray-500">
               Last refreshed {new Date(lastLoadedAt).toLocaleString()}
@@ -186,7 +214,38 @@ export default function NewsletterAdmin() {
                 {subscribers.map((subscriber) => (
                   <tr key={subscriber.email} className="border-t border-green-900/10">
                     <td className="p-3 font-bold text-[#183b25]">{subscriber.email}</td>
-                    <td className="p-3">{subscriber.interests.join(", ")}</td>
+                    <td className="p-3">
+                      <div className="grid gap-2">
+                        <label className="flex items-center gap-2 font-semibold text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={subscriber.interests.includes("food")}
+                            disabled={loading || (subscriber.interests.length === 1 && subscriber.interests.includes("food"))}
+                            onChange={(event) => {
+                              const next = event.target.checked
+                                ? Array.from(new Set([...subscriber.interests, "food"]))
+                                : subscriber.interests.filter((interest) => interest !== "food");
+                              void updateSubscriberLists(subscriber.email, next);
+                            }}
+                          />
+                          Farm products
+                        </label>
+                        <label className="flex items-center gap-2 font-semibold text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={subscriber.interests.includes("videos")}
+                            disabled={loading || (subscriber.interests.length === 1 && subscriber.interests.includes("videos"))}
+                            onChange={(event) => {
+                              const next = event.target.checked
+                                ? Array.from(new Set([...subscriber.interests, "videos"]))
+                                : subscriber.interests.filter((interest) => interest !== "videos");
+                              void updateSubscriberLists(subscriber.email, next);
+                            }}
+                          />
+                          Videos/updates
+                        </label>
+                      </div>
+                    </td>
                     <td className="p-3">{subscriber.source}</td>
                     <td className="p-3">{new Date(subscriber.updatedAt).toLocaleString()}</td>
                     <td className="p-3">
