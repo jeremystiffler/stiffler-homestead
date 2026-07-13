@@ -97,5 +97,6 @@ export async function getProduct(slug: string) {
 }
 
 export function isProductOrderable(product: { status: string; availableQuantity: number; infiniteQuantity?: boolean; priceCents?: number }) {
-  return (product.status === "available" || product.status === "preorder") && (isInfiniteQuantityProduct(product) || product.availableQuantity > 0);
+  if (isInfiniteQuantityProduct(product)) return product.status !== "hidden" && product.status !== "coming_soon";
+  return (product.status === "available" || product.status === "preorder") && product.availableQuantity > 0;
 }
