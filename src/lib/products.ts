@@ -28,6 +28,10 @@ export function productPriceLabel(priceCents: number, fallback?: string) {
   return priceCents > 0 ? formatPrice(priceCents) : fallback || "Contact for pricing";
 }
 
+function isPublicProduct(row: { status?: string }) {
+  return row.status !== "hidden" && row.status !== "coming_soon";
+}
+
 export function rowToProduct(row: ProductRow): HomesteadProduct {
   return {
     id: row.id,
@@ -55,7 +59,7 @@ export function rowToProduct(row: ProductRow): HomesteadProduct {
 
 export async function getAllProducts() {
   const supabase = getSupabaseServerClient();
-  if (!supabase) return PRODUCTS;
+  if (!supabase) return PRODUCTS.filter(isPublicProduct);
 
   const { data, error } = await supabase
     .from("homestead_products")
@@ -69,7 +73,7 @@ export async function getAllProducts() {
   }
 
   return (data || [])
-    .filter((row) => row.status !== "hidden")
+    .filter(isPublicProduct)
     .map((row) => rowToProduct(row as ProductRow));
 }
 

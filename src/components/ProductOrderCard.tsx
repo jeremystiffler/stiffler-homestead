@@ -38,7 +38,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
     const body = [
       `Hi Stiffler Homestead,`,
       ``,
-      `I would like to request/reserve ${quantity} ${product.unitLabel} of ${product.name}.`,
+      `I would like to request/reserve ${quantity} ${product.unitLabel} of ${product.name} for local pickup near Lexington, KY.`,
       ``,
       `Product: ${product.name}`,
       `Price listed: ${product.priceLabel}`,
@@ -46,7 +46,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
       ``,
       `My name:`,
       `My phone:`,
-      `Best pickup timing:`,
+      `Best local pickup timing:`,
       `Questions/notes:`,
     ].join("\n");
 
@@ -93,7 +93,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || `Could not start ${provider} order.`);
-      setManualMessage(`Order saved as pending. Please complete ${provider === "paypal" ? "PayPal" : "Venmo"} payment for ${formatDollars(product.priceCents * quantity)}. Inventory updates after payment is confirmed in admin.`);
+      setManualMessage(`Order saved as pending. Please complete ${provider === "paypal" ? "PayPal" : "Venmo"} payment for ${formatDollars(product.priceCents * quantity)}. We will confirm a local pickup time after payment is verified.`);
       window.open(data.paymentUrl, "_blank", "noopener,noreferrer");
     } catch (manualError) {
       setError(manualError instanceof Error ? manualError.message : `Could not start ${provider} order.`);
@@ -156,7 +156,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                 <div className="mt-4 grid gap-3">
                   <input className="rounded-xl border border-green-900/20 px-4 py-3 outline-none focus:border-[#2f7d4b]" placeholder="Name" value={customerName} onChange={(event) => setCustomerName(event.target.value)} />
                   <input className="rounded-xl border border-green-900/20 px-4 py-3 outline-none focus:border-[#2f7d4b]" placeholder="Email for receipt" type="email" value={customerEmail} onChange={(event) => setCustomerEmail(event.target.value)} />
-                  <input className="rounded-xl border border-green-900/20 px-4 py-3 outline-none focus:border-[#2f7d4b]" placeholder="Phone for pickup coordination" value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} />
+                  <input className="rounded-xl border border-green-900/20 px-4 py-3 outline-none focus:border-[#2f7d4b]" placeholder="Phone for local pickup coordination" value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} />
                   <button type="button" onClick={startCheckout} disabled={Boolean(loading)} className="rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f] disabled:cursor-not-allowed disabled:opacity-60">
                     {loading === "stripe" ? "Opening checkout..." : "Pay with card / Stripe"}
                   </button>
@@ -167,14 +167,14 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                 </div>
               ) : (
                 <a href={mailtoHref} className="mt-4 block rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f]">
-                  Request / reserve this order
+                  Request local pickup order
                 </a>
               )}
 
               {error && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-800">{error}</p>}
               {manualMessage && <p className="mt-3 rounded-xl bg-green-50 p-3 text-sm font-semibold text-green-900">{manualMessage}</p>}
               <p className="mt-3 text-xs leading-5 text-gray-500">
-                Stripe automatically updates inventory after confirmed payment. PayPal/Venmo orders are saved as pending and reduce inventory after admin payment confirmation.
+                Local pickup only near Lexington, KY. Card payments update inventory after confirmed payment; PayPal/Venmo orders update after payment is verified.
               </p>
             </>
           ) : (

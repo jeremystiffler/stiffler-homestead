@@ -68,9 +68,6 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           {post.meta.imageCredit && <figcaption className="px-4 py-2 text-xs text-gray-500">{post.meta.imageCredit}</figcaption>}
         </figure>
       )}
-      <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-        <strong>Disclosure:</strong> As an Amazon Associate I earn from qualifying purchases. Some posts also include Wisephone and Covenant Eyes affiliate links. Affiliate links help support the channel at no extra cost to you.
-      </div>
       <div className="prose prose-lg max-w-none rounded-3xl bg-white p-4 shadow-lg shadow-green-900/5 sm:p-6 md:p-8">
         <MDXRemote source={post.content} />
       </div>

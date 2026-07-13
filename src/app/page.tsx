@@ -11,8 +11,8 @@ const homepageFaqs = [
     answer: "Yes. The products page is set up for local meat chicken reservations and pickup coordination near Lexington, Kentucky.",
   },
   {
-    question: "Does Stiffler Homestead sell eggs, pork, lamb, or honey?",
-    answer: "The storefront supports eggs, pork, lamb, and future honey availability, with each product marked available, preorder, sold out, or coming soon as seasons change.",
+    question: "Is the storefront local only?",
+    answer: "Yes. Storefront orders are for local pickup near Lexington, Kentucky. We do not offer shipping or delivery through the storefront.",
   },
   {
     question: "How does Stiffler Homestead make money from gear links?",
@@ -64,7 +64,7 @@ export default async function HomePage() {
               Local homestead food, family-tested projects, and field notes from the Stiffler place.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-700 sm:text-xl">
-              Reserve local meat chickens near Lexington, KY, see future pork/lamb/egg availability, follow the blog from our YouTube videos, and shop the supplies and family-tech tools we actually recommend.
+              Reserve currently available homestead food for local pickup near Lexington, KY, follow practical notes from our family projects, and browse the supplies and family-tech tools we actually recommend.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link href="/products" className="rounded-full bg-[#2f7d4b] px-6 py-3 text-center font-black text-white shadow-lg shadow-green-900/10 hover:bg-[#27683f]">
@@ -105,8 +105,8 @@ export default async function HomePage() {
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Buy from the homestead</p>
-            <h2 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">Current meat, eggs, and future availability</h2>
-            <p className="mt-3 max-w-3xl leading-7 text-gray-700">Reserve available batches, ask about the next round, or join the interest list for pork, lamb, eggs, and future honey.</p>
+            <h2 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">Current local pickup items</h2>
+            <p className="mt-3 max-w-3xl leading-7 text-gray-700">Choose what is currently listed, select your quantity, and we will coordinate a scheduled pickup near Lexington, KY.</p>
           </div>
           <Link href="/products" className="w-full rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25] sm:w-auto">See full availability</Link>
         </div>
@@ -124,14 +124,14 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-6 rounded-[2rem] bg-[#183b25] p-5 text-white shadow-xl shadow-green-900/10 sm:p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-amber-300">Monetization paths</p>
-            <h2 className="mt-2 text-3xl font-black sm:text-4xl">Local food sales + affiliate guides can work together.</h2>
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-amber-300">Around the homestead</p>
+            <h2 className="mt-2 text-3xl font-black sm:text-4xl">Food, field notes, and practical tools we use.</h2>
             <p className="mt-4 max-w-3xl leading-8 text-white/80">
-              Food pages convert local buyers. Blog posts build trust from YouTube. Gear guide pages monetize search traffic with Amazon, Wisephone, and Covenant Eyes links while keeping recommendations practical and family-centered.
+              The storefront is for local pickup orders. The blog shares what we are learning. The gear guides collect tools and resources that have helped us build a calmer, more practical family homestead.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 md:min-w-80 md:grid-cols-1">
-            <Link href="/products" className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">Meat & eggs availability</Link>
+            <Link href="/products" className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">Visit the storefront</Link>
             <Link href="/homestead-supplies" className="rounded-full border border-white/30 px-5 py-3 text-center font-black text-white hover:bg-white/10">Affiliate gear hub</Link>
           </div>
         </div>

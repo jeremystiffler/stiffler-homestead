@@ -7,12 +7,12 @@ import ProductOrderCard from "@/components/ProductOrderCard";
 export const metadata: Metadata = {
   title: "Local Farm Food Near Lexington KY | Meat Chickens, Eggs, Pork & Lamb",
   description:
-    "Reserve local homestead food near Lexington, Kentucky: pasture-raised meat chickens, farm-fresh eggs, future pork, lamb, and honey availability from Stiffler Homestead.",
+    "Reserve currently listed local homestead food near Lexington, Kentucky for scheduled pickup from Stiffler Homestead.",
   alternates: { canonical: "/local-food-lexington-ky" },
   openGraph: {
     title: "Local Farm Food Near Lexington KY | Stiffler Homestead",
     description:
-      "A local availability board for pasture-raised meat chickens, eggs, pork, lamb, and future honey near Lexington, KY.",
+      "A local pickup storefront for currently listed Stiffler Homestead food near Lexington, KY.",
     url: "/local-food-lexington-ky",
     siteName: SITE_CONFIG.name,
     type: "website",
@@ -28,17 +28,17 @@ const faqs = [
   {
     question: "What local farm food can I reserve?",
     answer:
-      "The current availability board is built for pasture-raised meat chickens, farm-fresh eggs, pork, lamb, and future honey. Availability changes by season and batch size.",
+      "The storefront shows what is currently listed for local pickup. Availability changes by season and batch size.",
   },
   {
     question: "Do you ship meat or eggs?",
     answer:
-      "No. The food availability page is intended for local pickup near Lexington, KY unless a future product listing says otherwise.",
+      "No. The storefront is for local pickup near Lexington, KY only. We do not offer shipping or delivery through this site.",
   },
   {
-    question: "How do I get notified when pork, lamb, eggs, or honey are available?",
+    question: "How do I get notified about local food availability?",
     answer:
-      "Use the contact links on each product card or subscribe for food availability updates so the Stiffler family can contact you when the next batch opens.",
+      "Use the contact links on each product card or subscribe for food availability updates from Stiffler Homestead.",
   },
 ];
 
@@ -53,7 +53,7 @@ export default async function LocalFoodLexingtonPage() {
       url: pageUrl,
       email: SITE_CONFIG.contactEmail,
       description:
-        "Local homestead food availability near Lexington, Kentucky, including pasture-raised meat chickens, eggs, pork, lamb, and future honey.",
+        "Local homestead food availability for scheduled pickup near Lexington, Kentucky.",
       areaServed: [
         { "@type": "City", name: "Lexington" },
         { "@type": "AdministrativeArea", name: "Kentucky" },
@@ -77,10 +77,10 @@ export default async function LocalFoodLexingtonPage() {
       <section className="rounded-[2rem] bg-[#183b25] p-5 text-white shadow-xl shadow-green-900/10 sm:p-8 md:p-12">
         <p className="text-sm font-black uppercase tracking-[0.25em] text-amber-300">Lexington, Kentucky local farm food</p>
         <h1 className="mt-3 max-w-5xl text-3xl font-black leading-tight sm:text-5xl md:text-6xl">
-          Local meat chickens, eggs, pork, lamb, and future honey near Lexington, KY.
+          Local homestead food for scheduled pickup near Lexington, KY.
         </h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-white/80">
-          Stiffler Homestead is building a simple local pickup availability board for families who want real food from a real family farm: pasture-raised meat chickens first, with eggs, pork, lamb, and honey updates as each season opens.
+          Stiffler Homestead offers a simple local pickup storefront for families who want food from a real family homestead. Choose what is currently listed, select a quantity, and we will coordinate pickup details.
         </p>
         <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link href="/products#availability" className="rounded-full bg-amber-300 px-6 py-3 text-center font-black text-[#183b25]">
@@ -94,9 +94,9 @@ export default async function LocalFoodLexingtonPage() {
 
       <section className="mt-10 grid gap-5 md:grid-cols-3">
         {[
-          ["Pasture-raised meat chickens", "Reserve whole processed birds before processing day and confirm pickup details directly with the family."],
-          ["Farm-fresh eggs", "Weekly egg availability changes quickly, so the site can show current quantities once the backend is connected."],
-          ["Seasonal pork, lamb & honey", "Future product listings are ready for interest lists, deposits, and batch announcements."],
+          ["Choose a product", "Browse currently listed items from the storefront."],
+          ["Select quantity", "Choose how many you want and enter your contact information."],
+          ["Schedule pickup", "Pay or reserve, then we will coordinate a local pickup time near Lexington, KY."],
         ].map(([title, copy]) => (
           <div key={title} className="rounded-3xl bg-white p-6 shadow-lg shadow-green-900/5">
             <h2 className="text-xl font-black text-[#183b25]">{title}</h2>

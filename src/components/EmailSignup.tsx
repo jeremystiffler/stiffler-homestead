@@ -19,7 +19,7 @@ const INTEREST_OPTIONS: Array<{
   {
     key: "food",
     label: "Food sales & availability",
-    description: "Meat chickens, eggs, pork, lamb, honey, and pickup windows.",
+    description: "Local food availability and pickup windows.",
   },
   {
     key: "videos",

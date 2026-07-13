@@ -45,18 +45,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="sticky top-0 z-50 border-b border-green-900/10 bg-[#fffaf0]/90 shadow-sm backdrop-blur">
+        <nav className="sticky top-0 z-50 border-b border-green-900/10 bg-[#fffaf0]/85 shadow-sm backdrop-blur-xl">
           <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <Link href="/" className="flex min-w-0 items-center gap-2 font-black text-[#183b25]">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-300">SH</span>
-              <span className="truncate text-sm sm:text-base">Stiffler Homestead</span>
+            <Link href="/" className="group flex min-w-0 items-center gap-3 font-black text-[#183b25]">
+              <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-300 via-lime-200 to-[#2f7d4b] text-xl shadow-lg shadow-green-900/10 ring-2 ring-white transition group-hover:-rotate-3 group-hover:scale-105" aria-hidden="true">
+                🐓
+                <span className="absolute -right-1 -top-1 text-sm">🌿</span>
+              </span>
+              <span className="truncate text-base tracking-tight sm:text-lg">Stiffler Homestead</span>
             </Link>
-            <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-gray-700 sm:w-auto sm:justify-end sm:text-sm md:gap-5">
-              <Link href="/products" className="rounded-full bg-[#2f7d4b] px-4 py-2 text-white">Storefront</Link>
-              <Link href="/blog">Blog</Link>
-              <Link href="/homestead-supplies">Gear Guides</Link>
-              <Link href="/#newsletter">Subscribe</Link>
-              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer">
+            <div className="flex w-full flex-wrap items-center gap-2 rounded-full border border-green-900/10 bg-white/70 p-1 text-xs font-bold text-gray-700 shadow-sm sm:w-auto sm:justify-end sm:text-sm">
+              <Link href="/products" className="rounded-full bg-[#2f7d4b] px-4 py-2 text-white shadow-sm">Storefront</Link>
+              <Link href="/blog" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Blog</Link>
+              <Link href="/homestead-supplies" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Gear Guides</Link>
+              <Link href="/#newsletter" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Subscribe</Link>
+              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">
                 Supply Guide
               </a>
             </div>
@@ -68,7 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="mx-auto grid max-w-6xl gap-5 px-4 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <p className="font-black text-white">© {new Date().getFullYear()} Stiffler Homestead</p>
-              <p className="mt-1">As an Amazon Associate I earn from qualifying purchases.</p>
+              <p className="mt-1">Local pickup only near Lexington, KY. As an Amazon Associate I earn from qualifying purchases.</p>
             </div>
             <div className="flex flex-wrap gap-4">
               <Link href="/products">Storefront</Link>
