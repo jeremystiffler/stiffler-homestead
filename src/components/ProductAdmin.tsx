@@ -187,10 +187,15 @@ export default function ProductAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      const response = await fetch("/api/admin/products", {});
+      const response = await fetch(`/api/admin/products?t=${Date.now()}`, { cache: "no-store" });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to load products.");
-      setProducts((data.products || []).map((product: ProductRow) => normalizeProduct(product)));
+      const normalizedProducts = (data.products || []).map((product: ProductRow) => normalizeProduct(product));
+      setProducts(normalizedProducts);
+      setSelected((current) => {
+        const matchingProduct = normalizedProducts.find((product: ProductRow) => product.id ? product.id === current.id : product.slug === current.slug);
+        return matchingProduct ? normalizeProduct(matchingProduct) : current;
+      });
       setMessage("Products loaded.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to load products.");
@@ -230,11 +235,20 @@ export default function ProductAdmin() {
       const response = await fetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify(normalized),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to save product.");
-      setSelected(normalizeProduct({ ...normalized, ...(data.product || {}), infinite_quantity: data.product?.infinite_quantity ?? normalized.infinite_quantity }));
+      const savedProduct = normalizeProduct({ ...normalized, ...(data.product || {}), infinite_quantity: data.product?.infinite_quantity ?? normalized.infinite_quantity });
+      setSelected(savedProduct);
+      setProducts((currentProducts) => {
+        const existingIndex = currentProducts.findIndex((product) => product.id ? product.id === savedProduct.id : product.slug === savedProduct.slug);
+        if (existingIndex < 0) return [...currentProducts, savedProduct];
+        const nextProducts = [...currentProducts];
+        nextProducts[existingIndex] = savedProduct;
+        return nextProducts;
+      });
       if (!quiet) setMessage("Saved. Public inventory updates immediately.");
       await loadProducts();
     } catch (error) {

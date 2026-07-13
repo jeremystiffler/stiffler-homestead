@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { isAdminAuthorized } from "@/lib/adminAuth";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+function jsonNoStore(body: unknown, init?: ResponseInit) {
+  const response = NextResponse.json(body, init);
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  return response;
+}
+
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -11,9 +20,9 @@ function slugify(input: string) {
 }
 
 export async function GET(request: Request) {
-  if (!(await isAdminAuthorized(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdminAuthorized(request))) return jsonNoStore({ error: "Unauthorized" }, { status: 401 });
   const supabase = getSupabaseServerClient();
-  if (!supabase) return NextResponse.json({ error: "Supabase is not configured yet." }, { status: 503 });
+  if (!supabase) return jsonNoStore({ error: "Supabase is not configured yet." }, { status: 503 });
 
   const { data, error } = await supabase
     .from("homestead_products")
@@ -21,8 +30,8 @@ export async function GET(request: Request) {
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ products: data || [] });
+  if (error) return jsonNoStore({ error: error.message }, { status: 500 });
+  return jsonNoStore({ products: data || [] });
 }
 
 function toBoolean(value: unknown) {
@@ -32,13 +41,13 @@ function toBoolean(value: unknown) {
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdminAuthorized(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdminAuthorized(request))) return jsonNoStore({ error: "Unauthorized" }, { status: 401 });
   const supabase = getSupabaseServerClient();
-  if (!supabase) return NextResponse.json({ error: "Supabase is not configured yet." }, { status: 503 });
+  if (!supabase) return jsonNoStore({ error: "Supabase is not configured yet." }, { status: 503 });
 
   const body = await request.json();
   const name = String(body.name || "").trim();
-  if (!name) return NextResponse.json({ error: "Product name is required." }, { status: 400 });
+  if (!name) return jsonNoStore({ error: "Product name is required." }, { status: 400 });
 
   const requestedInfiniteQuantity = toBoolean(body.infinite_quantity ?? body.infiniteQuantity);
   const row = {
@@ -69,17 +78,27 @@ export async function POST(request: Request) {
     ? supabase.from("homestead_products").update(row).eq("id", productId)
     : supabase.from("homestead_products").upsert(row, { onConflict: "slug" });
 
-  const { data, error } = await saveQuery.select("*").single();
+  const { data: savedProduct, error: saveError } = await saveQuery.select("id,slug").single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data) return NextResponse.json({ error: "Product save did not return a saved row." }, { status: 500 });
+  if (saveError) return jsonNoStore({ error: saveError.message }, { status: 500 });
+  if (!savedProduct) return jsonNoStore({ error: "Product save did not return a saved row." }, { status: 500 });
 
-  if (Boolean(data.infinite_quantity) !== requestedInfiniteQuantity) {
-    return NextResponse.json({
-      error: "Product saved, but the infinite quantity value did not persist in the database.",
-      product: data,
+  const readbackQuery = supabase.from("homestead_products").select("*").limit(1);
+  const { data: readback, error: readbackError } = productId
+    ? await readbackQuery.eq("id", savedProduct.id).single()
+    : await readbackQuery.eq("slug", savedProduct.slug).single();
+
+  if (readbackError) return jsonNoStore({ error: readbackError.message }, { status: 500 });
+  if (!readback) return jsonNoStore({ error: "Product save completed, but DB readback returned no row." }, { status: 500 });
+
+  if (Boolean(readback.infinite_quantity) !== requestedInfiniteQuantity) {
+    return jsonNoStore({
+      error: "Product saved, but DB readback shows infinite quantity did not persist.",
+      product: readback,
+      requestedInfiniteQuantity,
+      persistedInfiniteQuantity: Boolean(readback.infinite_quantity),
     }, { status: 500 });
   }
 
-  return NextResponse.json({ product: data });
+  return jsonNoStore({ product: readback });
 }
