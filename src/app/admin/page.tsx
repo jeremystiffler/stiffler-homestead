@@ -22,7 +22,7 @@ export default function AdminPage() {
         <h2 className="font-black">Setup required before live payments</h2>
         <ul className="mt-3 list-disc space-y-2 pl-6 leading-7">
           <li>Create the Supabase tables using <code className="rounded bg-white px-2 py-1">supabase/schema.sql</code>.</li>
-          <li>Add Vercel env vars: Supabase URL, anon key, service role key, admin password, Stripe secret key, and Stripe webhook secret.</li>
+          <li>Add Vercel env vars: Supabase URL, anon key, service role key, admin password, Stripe secret key, Stripe webhook secret, and <code className="rounded bg-white px-2 py-1">RESEND_API_KEY</code> for newsletter broadcasts.</li>
           <li>Stripe automatically reduces inventory after the paid webhook event.</li>
           <li>PayPal and Venmo orders are saved as pending orders; click <strong>Mark paid</strong> after confirming payment to reduce inventory safely.</li>
         </ul>
