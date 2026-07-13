@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthorized } from "@/lib/adminAuth";
+import { isInfiniteQuantityProduct, stripInfiniteQuantityMarker, withInfiniteQuantityMarker } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +32,12 @@ export async function GET(request: Request) {
     .order("created_at", { ascending: true });
 
   if (error) return jsonNoStore({ error: error.message }, { status: 500 });
-  return jsonNoStore({ products: data || [] });
+  const products = (data || []).map((product) => ({
+    ...product,
+    infinite_quantity: isInfiniteQuantityProduct(product),
+    price_note: stripInfiniteQuantityMarker(product.price_note),
+  }));
+  return jsonNoStore({ products });
 }
 
 function toBoolean(value: unknown) {
@@ -61,7 +67,7 @@ export async function POST(request: Request) {
   const name = String(body.name ?? existingProduct?.name ?? "").trim();
   if (!name) return jsonNoStore({ error: "Choose a product or enter a product name before saving." }, { status: 400 });
 
-  const requestedInfiniteQuantity = toBoolean(body.infinite_quantity ?? body.infiniteQuantity ?? existingProduct?.infinite_quantity);
+  const requestedInfiniteQuantity = toBoolean(body.infinite_quantity ?? body.infiniteQuantity ?? isInfiniteQuantityProduct(existingProduct || {}));
   const status = String(body.status ?? existingProduct?.status ?? "coming_soon");
   const baseRow: Record<string, unknown> = {
     slug: String(body.slug ?? existingProduct?.slug ?? slugify(name)),
@@ -69,7 +75,7 @@ export async function POST(request: Request) {
     category: body.category ?? existingProduct?.category ?? "Meat chickens",
     description: body.description ?? existingProduct?.description ?? "",
     price_cents: Math.max(0, Number(body.price_cents ?? existingProduct?.price_cents ?? 0)),
-    price_note: body.price_note ?? existingProduct?.price_note ?? null,
+    price_note: withInfiniteQuantityMarker(body.price_note ?? existingProduct?.price_note ?? null, requestedInfiniteQuantity),
     unit_label: String(body.unit_label ?? existingProduct?.unit_label ?? "").trim() || "items",
     available_quantity: Math.max(0, Number(body.available_quantity ?? existingProduct?.available_quantity ?? 0)),
     infinite_quantity: requestedInfiniteQuantity,
@@ -102,11 +108,13 @@ export async function POST(request: Request) {
 
   let { data: savedProduct, error: saveError } = await saveProductRow(baseRow);
 
-  // If Supabase rejects an optional column because the production schema does not
-  // have it yet, retry without those columns so core fields still save.
+  // If Supabase rejects a column because the production schema/schema cache does not
+  // have it yet, retry without newer columns. Infinite quantity is still persisted
+  // through the price_note marker fallback until the DB migration is applied.
   if (saveError && /column|schema cache/i.test(saveError.message || "")) {
     const fallbackRow = { ...baseRow };
     for (const column of optionalColumns) delete fallbackRow[column];
+    delete fallbackRow.infinite_quantity;
     const fallbackResult = await saveProductRow(fallbackRow);
     savedProduct = fallbackResult.data;
     saveError = fallbackResult.error;
@@ -126,14 +134,20 @@ export async function POST(request: Request) {
   if (readbackError) return jsonNoStore({ error: readbackError.message }, { status: 500 });
   if (!readback) return jsonNoStore({ error: "Product save completed, but DB readback returned no row." }, { status: 500 });
 
-  if (Boolean(readback.infinite_quantity) !== requestedInfiniteQuantity) {
+  const normalizedReadback = {
+    ...readback,
+    infinite_quantity: isInfiniteQuantityProduct(readback),
+    price_note: stripInfiniteQuantityMarker(readback.price_note),
+  };
+
+  if (Boolean(normalizedReadback.infinite_quantity) !== requestedInfiniteQuantity) {
     return jsonNoStore({
       error: "Product saved, but DB readback shows infinite quantity did not persist.",
-      product: readback,
+      product: normalizedReadback,
       requestedInfiniteQuantity,
-      persistedInfiniteQuantity: Boolean(readback.infinite_quantity),
+      persistedInfiniteQuantity: Boolean(normalizedReadback.infinite_quantity),
     }, { status: 500 });
   }
 
-  return jsonNoStore({ product: readback });
+  return jsonNoStore({ product: normalizedReadback });
 }

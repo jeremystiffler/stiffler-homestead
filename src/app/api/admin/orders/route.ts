@@ -43,17 +43,27 @@ export async function PATCH(request: Request) {
 
     const { data: product, error: productError } = await supabase
       .from("homestead_products")
-      .select("infinite_quantity")
+      .select("*")
       .eq("id", order.product_id)
       .single();
 
     if (productError) return NextResponse.json({ error: productError.message }, { status: 500 });
 
     if (!isInfiniteQuantityProduct(product || {})) {
-      const { error: decrementError } = await supabase.rpc("decrement_homestead_product_inventory", {
-        product_id_input: order.product_id,
-        quantity_input: order.quantity,
-      });
+      const nextQuantity = Number(product.available_quantity || 0) - Number(order.quantity || 0);
+      if (nextQuantity < 0) {
+        const message = "Not enough inventory available for this order.";
+        await supabase.from("homestead_orders").update({ status: "inventory_error", notes: message }).eq("id", orderId);
+        return NextResponse.json({ error: message }, { status: 409 });
+      }
+
+      const { error: decrementError } = await supabase
+        .from("homestead_products")
+        .update({
+          available_quantity: nextQuantity,
+          status: nextQuantity <= 0 ? "sold_out" : product.status,
+        })
+        .eq("id", order.product_id);
 
       if (decrementError) {
         await supabase.from("homestead_orders").update({ status: "inventory_error", notes: decrementError.message }).eq("id", orderId);

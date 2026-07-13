@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isInfiniteQuantityProduct } from "@/lib/inventory";
+import { isInfiniteQuantityProduct, stripInfiniteQuantityMarker } from "@/lib/inventory";
 
 type ProductRow = {
   id?: string;
@@ -70,6 +70,7 @@ function normalizeProduct(product: ProductRow): ProductRow {
   return {
     ...product,
     infinite_quantity: Boolean(product.infinite_quantity),
+    price_note: stripInfiniteQuantityMarker(product.price_note),
   };
 }
 

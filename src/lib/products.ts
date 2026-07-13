@@ -1,6 +1,6 @@
 import { PRODUCTS, type HomesteadProduct } from "@/content/products";
 import { SITE_CONFIG } from "@/lib/config";
-import { isInfiniteQuantityProduct } from "@/lib/inventory";
+import { isInfiniteQuantityProduct, stripInfiniteQuantityMarker } from "@/lib/inventory";
 import { formatPrice } from "@/lib/money";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
@@ -51,7 +51,7 @@ export function rowToProduct(row: ProductRow): HomesteadProduct {
     description: row.description,
     priceCents: row.price_cents || 0,
     priceLabel: productPriceLabel(row.price_cents),
-    priceNote: row.price_note || undefined,
+    priceNote: stripInfiniteQuantityMarker(row.price_note) || undefined,
     unitLabel: row.unit_label,
     availableQuantity: row.available_quantity,
     infiniteQuantity,
