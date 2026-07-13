@@ -450,10 +450,10 @@ export default function ProductAdmin() {
             Feature on homepage
           </label>
           <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f7f3ea] p-4 text-sm font-black text-[#183b25]">
-            <input type="checkbox" checked={isInfiniteQuantityProduct(selected)} onChange={(event) => update("infinite_quantity", event.target.checked)} className="mt-1" />
+            <input type="checkbox" checked={Boolean(selected.infinite_quantity)} onChange={(event) => update("infinite_quantity", event.target.checked)} className="mt-1" />
             <span>
-              Infinite quantity / always available
-              <span className="mt-1 block text-xs font-semibold leading-5 text-gray-600">Use this for eggs or other products where inventory should not count down after orders.</span>
+              Infinite quantity
+              <span className="mt-1 block text-xs font-semibold leading-5 text-gray-600">Turn this on for any product you do not want inventory to count down for after orders.</span>
             </span>
           </label>
           <div className="mt-6 flex flex-wrap gap-3">

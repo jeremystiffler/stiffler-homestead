@@ -88,7 +88,7 @@ export const PRODUCTS: HomesteadProduct[] = [
     priceNote: "Egg price will be confirmed before pickup.",
     unitLabel: "dozens",
     availableQuantity: 0,
-    infiniteQuantity: true,
+    infiniteQuantity: false,
     status: "available",
     availabilityWindow: "Weekly availability varies",
     pickupNote: "Local pickup only. We will confirm current inventory before pickup.",

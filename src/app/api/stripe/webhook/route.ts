@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       if (order?.status !== "paid") {
         const { data: product } = await supabase
           .from("homestead_products")
-          .select("slug, category, name")
+          .select("infinite_quantity")
           .eq("id", productId)
           .single();
 

@@ -1,4 +1,4 @@
--- Adds an infinite/always-available inventory mode for products such as eggs.
+-- Adds an optional infinite inventory mode that can be enabled per product.
 -- Safe to run more than once in Supabase SQL editor.
 
 alter table public.homestead_products
@@ -37,7 +37,4 @@ begin
 end;
 $$ language plpgsql;
 
-update public.homestead_products
-set infinite_quantity = true,
-    status = case when status = 'sold_out' then 'available' else status end
-where slug = 'farm-fresh-eggs';
+

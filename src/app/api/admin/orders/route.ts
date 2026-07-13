@@ -43,7 +43,7 @@ export async function PATCH(request: Request) {
 
     const { data: product, error: productError } = await supabase
       .from("homestead_products")
-      .select("slug, category, name")
+      .select("infinite_quantity")
       .eq("id", order.product_id)
       .single();
 
