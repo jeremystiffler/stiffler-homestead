@@ -46,34 +46,45 @@ export async function POST(request: Request) {
   if (!supabase) return jsonNoStore({ error: "Supabase is not configured yet." }, { status: 503 });
 
   const body = await request.json();
-  const name = String(body.name || "").trim();
-  if (!name) return jsonNoStore({ error: "Product name is required." }, { status: 400 });
-
-  const requestedInfiniteQuantity = toBoolean(body.infinite_quantity ?? body.infiniteQuantity);
-  const row = {
-    slug: String(body.slug || slugify(name)),
-    name,
-    category: body.category || "Meat chickens",
-    description: body.description || "",
-    price_cents: Math.max(0, Number(body.price_cents || 0)),
-    price_note: body.price_note || null,
-    unit_label: String(body.unit_label || "").trim() || "items",
-    available_quantity: Math.max(0, Number(body.available_quantity || 0)),
-    infinite_quantity: requestedInfiniteQuantity,
-    status: body.status || "coming_soon",
-    availability_window: body.availability_window || "Update availability",
-    pickup_note: body.pickup_note || "Local pickup details will be confirmed after purchase.",
-    image_url: body.image_url || null,
-    image_alt: body.image_alt || name,
-    image_emoji: body.image_emoji || "🌱",
-    sold_out_message: body.sold_out_message || "Sold out. Contact us for next availability.",
-    featured: body.status === "hidden" ? false : Boolean(body.featured),
-    paypal_url: body.paypal_url || null,
-    venmo_url: body.venmo_url || null,
-    sort_order: Number(body.sort_order || 100),
-  };
-
   const productId = String(body.id || "").trim();
+  const incomingSlug = String(body.slug || "").trim();
+
+  let existingProduct: Record<string, unknown> | null = null;
+  if (productId || incomingSlug) {
+    const existingQuery = supabase.from("homestead_products").select("*").limit(1);
+    const { data } = productId
+      ? await existingQuery.eq("id", productId).maybeSingle()
+      : await existingQuery.eq("slug", incomingSlug).maybeSingle();
+    existingProduct = data || null;
+  }
+
+  const name = String(body.name ?? existingProduct?.name ?? "").trim();
+  if (!name) return jsonNoStore({ error: "Choose a product or enter a product name before saving." }, { status: 400 });
+
+  const requestedInfiniteQuantity = toBoolean(body.infinite_quantity ?? body.infiniteQuantity ?? existingProduct?.infinite_quantity);
+  const status = String(body.status ?? existingProduct?.status ?? "coming_soon");
+  const row = {
+    slug: String(body.slug ?? existingProduct?.slug ?? slugify(name)),
+    name,
+    category: body.category ?? existingProduct?.category ?? "Meat chickens",
+    description: body.description ?? existingProduct?.description ?? "",
+    price_cents: Math.max(0, Number(body.price_cents ?? existingProduct?.price_cents ?? 0)),
+    price_note: body.price_note ?? existingProduct?.price_note ?? null,
+    unit_label: String(body.unit_label ?? existingProduct?.unit_label ?? "").trim() || "items",
+    available_quantity: Math.max(0, Number(body.available_quantity ?? existingProduct?.available_quantity ?? 0)),
+    infinite_quantity: requestedInfiniteQuantity,
+    status,
+    availability_window: body.availability_window ?? existingProduct?.availability_window ?? "Update availability",
+    pickup_note: body.pickup_note ?? existingProduct?.pickup_note ?? "Local pickup details will be confirmed after purchase.",
+    image_url: body.image_url ?? existingProduct?.image_url ?? null,
+    image_alt: body.image_alt ?? existingProduct?.image_alt ?? name,
+    image_emoji: body.image_emoji ?? existingProduct?.image_emoji ?? "🌱",
+    sold_out_message: body.sold_out_message ?? existingProduct?.sold_out_message ?? "Sold out. Contact us for next availability.",
+    featured: status === "hidden" ? false : toBoolean(body.featured ?? existingProduct?.featured),
+    paypal_url: body.paypal_url ?? existingProduct?.paypal_url ?? null,
+    venmo_url: body.venmo_url ?? existingProduct?.venmo_url ?? null,
+    sort_order: Number(body.sort_order ?? existingProduct?.sort_order ?? 100),
+  };
   const saveQuery = productId
     ? supabase.from("homestead_products").update(row).eq("id", productId)
     : supabase.from("homestead_products").upsert(row, { onConflict: "slug" });
