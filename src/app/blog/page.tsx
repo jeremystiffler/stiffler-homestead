@@ -2,8 +2,9 @@ import Link from "next/link";
 import { getAllPosts } from "@/lib/posts";
 
 export const metadata = {
-  title: "Blog",
-  description: "Stiffler Homestead video notes, practical projects, and affiliate-linked gear guides.",
+  title: "Homestead Blog & YouTube Field Notes",
+  description: "Practical Stiffler Homestead blog posts from YouTube videos: chickens, sheep, composting, family homesteading, automation, and affiliate-linked gear guides.",
+  alternates: { canonical: "/blog" },
 };
 
 export default function BlogPage() {

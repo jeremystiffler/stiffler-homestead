@@ -5,13 +5,56 @@ import { getAllPosts } from "@/lib/posts";
 import { getFeaturedProducts } from "@/lib/products";
 import { SITE_CONFIG } from "@/lib/config";
 
+const homepageFaqs = [
+  {
+    question: "Can I buy local meat chickens from Stiffler Homestead near Lexington, KY?",
+    answer: "Yes. The products page is set up for local meat chicken reservations and pickup coordination near Lexington, Kentucky.",
+  },
+  {
+    question: "Does Stiffler Homestead sell eggs, pork, lamb, or honey?",
+    answer: "The storefront supports eggs, pork, lamb, and future honey availability, with each product marked available, preorder, sold out, or coming soon as seasons change.",
+  },
+  {
+    question: "How does Stiffler Homestead make money from gear links?",
+    answer: "The site uses affiliate links for practical homestead supplies, Wisephone, and Covenant Eyes. Those links can support the homestead at no extra cost to buyers.",
+  },
+];
+
 export default async function HomePage() {
   const posts = getAllPosts();
   const featured = posts.slice(0, 6);
   const products = await getFeaturedProducts();
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.siteUrl,
+      description: SITE_CONFIG.tagline,
+      sameAs: [SITE_CONFIG.youtubeUrl, SITE_CONFIG.supplyGuideUrl],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.siteUrl,
+      email: SITE_CONFIG.contactEmail,
+      sameAs: [SITE_CONFIG.youtubeUrl, SITE_CONFIG.supplyGuideUrl],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: homepageFaqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: { "@type": "Answer", text: faq.answer },
+      })),
+    },
+  ];
 
   return (
     <div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="relative overflow-hidden bg-[#f7f3ea]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#d9f99d55,transparent_35%),radial-gradient(circle_at_80%_20%,#f6c45366,transparent_28%)]" />
         <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:py-14 md:grid-cols-[1.05fr_.95fr] md:items-center md:py-24">
@@ -21,18 +64,18 @@ export default async function HomePage() {
               Local homestead food, family-tested projects, and field notes from the Stiffler place.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-700 sm:text-xl">
-              Reserve meat chickens, see future pork/lamb/egg availability, follow the blog from our YouTube videos, and shop the supplies and family-tech tools we actually recommend.
+              Reserve local meat chickens near Lexington, KY, see future pork/lamb/egg availability, follow the blog from our YouTube videos, and shop the supplies and family-tech tools we actually recommend.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link href="/products" className="rounded-full bg-[#2f7d4b] px-6 py-3 text-center font-black text-white shadow-lg shadow-green-900/10 hover:bg-[#27683f]">
                 Buy local meat & eggs
               </Link>
-              <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
-                Watch the videos
-              </a>
-              <a href={SITE_CONFIG.supplyGuideUrl} target="_blank" rel="noreferrer" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
-                Shop the supply guide
-              </a>
+              <Link href="/local-food-lexington-ky" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
+                Local food near Lexington
+              </Link>
+              <Link href="/homestead-supplies" className="rounded-full border-2 border-[#2f7d4b] bg-white px-6 py-3 text-center font-black text-[#2f7d4b] hover:bg-green-50">
+                Shop gear guides
+              </Link>
             </div>
           </div>
           <div className="rounded-[2rem] bg-white p-3 shadow-2xl shadow-green-900/10 sm:p-4 md:rotate-1">
@@ -76,6 +119,22 @@ export default async function HomePage() {
 
       <section id="newsletter" className="mx-auto max-w-6xl px-4 py-12">
         <EmailSignup />
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <div className="grid gap-6 rounded-[2rem] bg-[#183b25] p-5 text-white shadow-xl shadow-green-900/10 sm:p-8 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-amber-300">Monetization paths</p>
+            <h2 className="mt-2 text-3xl font-black sm:text-4xl">Local food sales + affiliate guides can work together.</h2>
+            <p className="mt-4 max-w-3xl leading-8 text-white/80">
+              Food pages convert local buyers. Blog posts build trust from YouTube. Gear guide pages monetize search traffic with Amazon, Wisephone, and Covenant Eyes links while keeping recommendations practical and family-centered.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 md:min-w-80 md:grid-cols-1">
+            <Link href="/local-food-lexington-ky" className="rounded-full bg-amber-300 px-5 py-3 text-center font-black text-[#183b25]">Local SEO landing page</Link>
+            <Link href="/homestead-supplies" className="rounded-full border border-white/30 px-5 py-3 text-center font-black text-white hover:bg-white/10">Affiliate gear hub</Link>
+          </div>
+        </div>
       </section>
 
       <section id="videos" className="mx-auto max-w-6xl px-4 py-12">
