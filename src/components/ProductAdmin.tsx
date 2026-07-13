@@ -66,6 +66,13 @@ const blankProduct: ProductRow = {
   sort_order: 100,
 };
 
+function normalizeProduct(product: ProductRow): ProductRow {
+  return {
+    ...product,
+    infinite_quantity: Boolean(product.infinite_quantity),
+  };
+}
+
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -158,7 +165,7 @@ export default function ProductAdmin() {
       const response = await fetch("/api/admin/products", {});
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to load products.");
-      setProducts(data.products || []);
+      setProducts((data.products || []).map((product: ProductRow) => normalizeProduct(product)));
       setMessage("Products loaded.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to load products.");
@@ -202,7 +209,7 @@ export default function ProductAdmin() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to save product.");
-      setSelected(data.product);
+      setSelected(normalizeProduct({ ...normalized, ...(data.product || {}), infinite_quantity: data.product?.infinite_quantity ?? normalized.infinite_quantity }));
       if (!quiet) setMessage("Saved. Public inventory updates immediately.");
       await loadProducts();
     } catch (error) {

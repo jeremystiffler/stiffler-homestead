@@ -58,20 +58,13 @@ export async function POST(request: Request) {
     sort_order: Number(body.sort_order || 100),
   };
 
-  const saveProduct = (productRow: typeof row | Omit<typeof row, "infinite_quantity">) => supabase
+  const saveProduct = (productRow: typeof row) => supabase
     .from("homestead_products")
     .upsert(productRow, { onConflict: row.id ? "id" : "slug" })
     .select("*")
     .single();
 
-  let { data, error } = await saveProduct(row);
-
-  if (error && /infinite_quantity/i.test(error.message)) {
-    const { infinite_quantity: _infiniteQuantity, ...legacyRow } = row;
-    const legacyResult = await saveProduct(legacyRow);
-    data = legacyResult.data;
-    error = legacyResult.error;
-  }
+  const { data, error } = await saveProduct(row);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ product: data });
