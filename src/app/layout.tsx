@@ -61,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex w-full flex-wrap items-center gap-2 rounded-full border border-green-900/10 bg-white/70 p-1 text-xs font-bold text-gray-700 shadow-sm sm:w-auto sm:justify-end sm:text-sm">
               <Link href="/local-food-lexington-ky" className="rounded-full bg-[#2f7d4b] px-4 py-2 text-white shadow-sm">Local Food</Link>
               <Link href="/products" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Storefront</Link>
+              <Link href="/links" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Links</Link>
               <Link href="/blog" className="rounded-full px-3 py-2 hover:bg-[#f7f3ea] hover:text-[#183b25]">Blog</Link>
               <SubscribePopup className="rounded-full bg-red-600 px-4 py-2 text-white shadow-sm transition hover:bg-red-700" label="Subscribe" />
             </div>
@@ -77,6 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex flex-wrap gap-4">
               <Link href="/products">Storefront</Link>
               <Link href="/local-food-lexington-ky">Local food Lexington KY</Link>
+              <Link href="/links">Links</Link>
               <Link href="/about">About</Link>
               <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer">YouTube</a>
               <Link href="/disclosure">Disclosure</Link>
