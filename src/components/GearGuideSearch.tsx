@@ -18,8 +18,8 @@ export default function GearGuideSearch({ items }: { items: GearItem[] }) {
     <section className="mt-12 rounded-[2rem] bg-white p-5 shadow-lg shadow-green-900/5 sm:p-8" id="recommended-gear">
       <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Searchable recommended item list</p>
-          <h2 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">Every item we recommend buying</h2>
+          <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Searchable stuff we use list</p>
+          <h2 className="mt-2 text-3xl font-black text-[#183b25] sm:text-4xl">Find the exact tools and supplies</h2>
           <p className="mt-3 max-w-3xl leading-7 text-gray-700">These are specific item links, not vague shopping rabbit holes. Amazon recommendations use the Stiffler Homestead affiliate tag, and partner tools use our direct partner links.</p>
         </div>
         <div className="rounded-2xl bg-amber-50 p-4 text-sm font-semibold text-amber-950">Need to add or adjust one? Edit <code className="rounded bg-white px-2 py-1">src/content/gearItems.ts</code> and deploy.</div>
