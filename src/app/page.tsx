@@ -135,6 +135,23 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <div className="grid gap-6 md:grid-cols-2">
+          <article className="rounded-[2rem] bg-[#ddf8e8] p-6 shadow-lg shadow-green-900/5 sm:p-8">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Starting from scratch</p>
+            <h2 className="mt-3 text-3xl font-black text-[#183b25]">A Homestead Setup Call can save you a bad first purchase.</h2>
+            <p className="mt-4 leading-7 text-gray-700">Talk through chickens, brooders, a first garden, or the next practical step with someone who has learned a few things the muddy way.</p>
+            <Link href="/homestead-setup-call" className="mt-6 inline-flex rounded-full bg-[#2f7d4b] px-5 py-3 font-black text-white hover:bg-[#27683f]">Request a setup call</Link>
+          </article>
+          <article className="rounded-[2rem] bg-[#fffaf0] p-6 shadow-lg shadow-green-900/5 sm:p-8">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-[#2f7d4b]">Chick-start season</p>
+            <h2 className="mt-3 text-3xl font-black text-[#183b25]">Start chicks with a plan, a gear list, and less panic.</h2>
+            <p className="mt-4 leading-7 text-gray-700">Request a Chick-Start Season Package for local coordination when windows are open, or use the exact gear shelf to build your own setup.</p>
+            <Link href="/chick-start" className="mt-6 inline-flex rounded-full bg-amber-300 px-5 py-3 font-black text-[#183b25] hover:bg-amber-200">Explore chick-start options</Link>
+          </article>
+        </div>
+      </section>
+
       <section id="newsletter" className="mx-auto max-w-6xl px-4 py-12">
         <EmailSignup />
       </section>
