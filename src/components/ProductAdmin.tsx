@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { isInfiniteQuantityProduct, stripInfiniteQuantityMarker } from "@/lib/inventory";
+import { formatQuantity } from "@/lib/quantity";
 
 type ProductRow = {
   id?: string;
@@ -500,6 +501,8 @@ export default function ProductAdmin() {
                 <input
                   type="number"
                   min="0"
+                  step="0.5"
+                  inputMode="decimal"
                   value={String(selected.available_quantity)}
                   disabled={isInfiniteQuantityProduct(selected)}
                   onChange={(event) => update("available_quantity", Number(event.target.value))}
@@ -605,7 +608,7 @@ export default function ProductAdmin() {
               <div key={order.id} className="rounded-2xl border border-green-900/10 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-black text-[#183b25]">{order.product?.name || "Product"} × {order.quantity}</p>
+                    <p className="font-black text-[#183b25]">{order.product?.name || "Product"} × {formatQuantity(Number(order.quantity || 0))}</p>
                     <p className="mt-1 text-sm text-gray-600">{order.payment_provider.toUpperCase()} • {formatMoney(order.total_cents)} • {order.status}</p>
                     <p className="mt-1 text-xs text-gray-500">{new Date(order.created_at).toLocaleString()}</p>
                     {(order.customer_name || order.customer_email || order.customer_phone) && <p className="mt-2 text-sm text-gray-700">{[order.customer_name, order.customer_email, order.customer_phone].filter(Boolean).join(" • ")}</p>}

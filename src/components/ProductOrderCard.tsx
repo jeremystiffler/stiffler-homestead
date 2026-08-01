@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { HomesteadProduct } from "@/content/products";
 import { SITE_CONFIG } from "@/lib/config";
 import { isProductOrderable } from "@/lib/products";
+import { formatQuantity, parseOrderQuantity } from "@/lib/quantity";
 import SubscribePopup from "@/components/SubscribePopup";
 
 function briefDescription(description: string) {
@@ -31,10 +32,10 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
     const body = [
       `Hi Stiffler Homestead,`,
       ``,
-      `I would like to purchase/reserve ${quantity} ${product.unitLabel} of ${product.name} for local pickup near Lexington, KY.`,
+      `I would like to purchase/reserve ${formatQuantity(quantity)} ${product.unitLabel} of ${product.name} for local pickup near Lexington, KY.`,
       ``,
       `Product: ${product.name}`,
-      `Quantity: ${quantity} ${product.unitLabel}`,
+      `Quantity: ${formatQuantity(quantity)} ${product.unitLabel}`,
       ``,
       `My name:`,
       `My phone:`,
@@ -118,7 +119,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2f7d4b]">Quantity</p>
               <p className="mt-1 font-bold text-[#183b25]">
-                {orderable ? infiniteQuantity ? `Order any quantity of ${product.unitLabel}` : `${max} ${product.unitLabel} available` : "Subscribe for new availability"}
+                {orderable ? infiniteQuantity ? `Order any quantity of ${product.unitLabel}` : `${formatQuantity(max)} ${product.unitLabel} available` : "Subscribe for new availability"}
               </p>
             </div>
             {orderable && (
@@ -126,13 +127,14 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                 id={`quantity-${product.slug}`}
                 aria-label={`Quantity for ${product.name}`}
                 type="number"
-                inputMode="numeric"
-                min={1}
+                inputMode="decimal"
+                min={0.5}
+                step={0.5}
                 max={hasQuantityCap ? max : undefined}
                 value={quantity}
                 onChange={(event) => {
-                  const next = Number(event.target.value);
-                  setQuantity(Number.isNaN(next) ? 1 : hasQuantityCap ? Math.min(Math.max(Math.floor(next), 1), max) : Math.max(Math.floor(next), 1));
+                  const next = parseOrderQuantity(event.target.value, quantity || 1);
+                  setQuantity(hasQuantityCap ? Math.min(next, max) : next);
                 }}
                 className="w-24 rounded-xl border border-green-900/20 bg-white px-3 py-2 text-center text-lg font-black text-[#183b25] outline-none focus:border-[#2f7d4b]"
               />

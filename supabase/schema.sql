@@ -12,7 +12,7 @@ create table if not exists public.homestead_products (
   price_cents integer not null default 0 check (price_cents >= 0),
   price_note text,
   unit_label text not null default 'items',
-  available_quantity integer not null default 0 check (available_quantity >= 0),
+  available_quantity numeric(10,2) not null default 0 check (available_quantity >= 0),
   infinite_quantity boolean not null default false,
   status text not null default 'coming_soon' check (status in ('available', 'preorder', 'sold_out', 'coming_soon', 'hidden')),
   availability_window text not null default 'Update availability',
@@ -32,7 +32,7 @@ create table if not exists public.homestead_products (
 create table if not exists public.homestead_orders (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references public.homestead_products(id),
-  quantity integer not null check (quantity > 0),
+  quantity numeric(10,2) not null check (quantity > 0),
   unit_price_cents integer not null check (unit_price_cents >= 0),
   total_cents integer not null check (total_cents >= 0),
   status text not null default 'pending' check (status in ('pending', 'paid', 'cancelled', 'refunded', 'inventory_error')),
@@ -60,10 +60,11 @@ create trigger homestead_products_updated_at
 before update on public.homestead_products
 for each row execute function public.set_updated_at();
 
-create or replace function public.decrement_homestead_product_inventory(product_id_input uuid, quantity_input integer)
+drop function if exists public.decrement_homestead_product_inventory(uuid, integer);
+create or replace function public.decrement_homestead_product_inventory(product_id_input uuid, quantity_input numeric)
 returns void as $$
 declare
-  remaining integer;
+  remaining numeric;
 begin
   if exists (
     select 1
@@ -101,6 +102,12 @@ using (true);
 
 alter table public.homestead_products
 add column if not exists infinite_quantity boolean not null default false;
+
+alter table public.homestead_products
+alter column available_quantity type numeric(10,2) using available_quantity::numeric;
+
+alter table public.homestead_orders
+alter column quantity type numeric(10,2) using quantity::numeric;
 
 alter table public.homestead_products drop constraint if exists homestead_products_status_check;
 alter table public.homestead_products

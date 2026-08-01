@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { SITE_CONFIG } from "@/lib/config";
 import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
+import { formatQuantity, parseOrderQuantity } from "@/lib/quantity";
 
 function buildVenmoPaymentUrl(baseUrl: string, amountCents: number, note: string) {
   const cleaned = baseUrl.trim();
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 
   const productId = body.productId ? String(body.productId) : "";
   const slug = body.slug ? String(body.slug) : "";
-  const quantity = Math.max(1, Math.floor(Number(body.quantity || 1)));
+  const quantity = parseOrderQuantity(body.quantity || 1);
   const customerEmail = String(body.customerEmail || "").trim();
   const customerName = String(body.customerName || "").trim();
   const customerPhone = String(body.customerPhone || "").trim();
@@ -49,8 +50,10 @@ export async function POST(request: Request) {
   const defaultVenmoUrl = SITE_CONFIG.venmoHandle ? `https://venmo.com/${SITE_CONFIG.venmoHandle}` : "";
   const paymentUrl = provider === "paypal" ? product.paypal_url : product.venmo_url || defaultVenmoUrl;
   if (!paymentUrl) return NextResponse.json({ error: `${provider} is not configured for this product.` }, { status: 400 });
+  const totalCents = Math.round(Number(product.price_cents) * quantity);
+  const quantityLabel = `${formatQuantity(quantity)} ${product.unit_label}`;
   const finalPaymentUrl = provider === "venmo"
-    ? buildVenmoPaymentUrl(paymentUrl, product.price_cents * quantity, `Stiffler Homestead order: ${quantity} ${product.unit_label} ${product.name}`)
+    ? buildVenmoPaymentUrl(paymentUrl, totalCents, `Stiffler Homestead order: ${quantityLabel} ${product.name}`)
     : paymentUrl;
 
   const { data: order, error: orderError } = await supabase
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
       product_id: product.id,
       quantity,
       unit_price_cents: product.price_cents,
-      total_cents: product.price_cents * quantity,
+      total_cents: totalCents,
       status: "pending",
       customer_email: customerEmail || null,
       customer_name: customerName || null,

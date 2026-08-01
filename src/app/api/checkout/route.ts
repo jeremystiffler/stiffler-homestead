@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { getStripe } from "@/lib/stripe";
+import { formatQuantity, isWholeQuantity, parseOrderQuantity } from "@/lib/quantity";
 
 export async function POST(request: Request) {
   const stripe = getStripe();
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
   const body = await request.json();
   const productId = body.productId ? String(body.productId) : "";
   const slug = body.slug ? String(body.slug) : "";
-  const quantity = Math.max(1, Math.floor(Number(body.quantity || 1)));
+  const quantity = parseOrderQuantity(body.quantity || 1);
   const customerEmail = String(body.customerEmail || "").trim();
   const customerName = String(body.customerName || "").trim();
   const customerPhone = String(body.customerPhone || "").trim();
@@ -33,6 +34,11 @@ export async function POST(request: Request) {
   if (!product.price_cents || product.price_cents <= 0) {
     return NextResponse.json({ error: "This product does not have checkout pricing yet." }, { status: 400 });
   }
+  const totalCents = Math.round(Number(product.price_cents) * quantity);
+  const quantityLabel = `${formatQuantity(quantity)} ${product.unit_label}`;
+  const stripeLineItemQuantity = isWholeQuantity(quantity) ? quantity : 1;
+  const stripeUnitAmount = isWholeQuantity(quantity) ? product.price_cents : totalCents;
+  const stripeProductName = isWholeQuantity(quantity) ? product.name : `${product.name} (${quantityLabel})`;
 
   const { data: order, error: orderError } = await supabase
     .from("homestead_orders")
@@ -40,7 +46,7 @@ export async function POST(request: Request) {
       product_id: product.id,
       quantity,
       unit_price_cents: product.price_cents,
-      total_cents: product.price_cents * quantity,
+      total_cents: totalCents,
       status: "pending",
       customer_email: customerEmail || null,
       customer_name: customerName || null,
@@ -71,12 +77,12 @@ export async function POST(request: Request) {
       },
       line_items: [
         {
-          quantity,
+          quantity: stripeLineItemQuantity,
           price_data: {
             currency: "usd",
-            unit_amount: product.price_cents,
+            unit_amount: stripeUnitAmount,
             product_data: {
-              name: product.name,
+              name: stripeProductName,
               description: String(product.description || "").slice(0, 1000),
               images: productImage ? [productImage] : undefined,
             },
