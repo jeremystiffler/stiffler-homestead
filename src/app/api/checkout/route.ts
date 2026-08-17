@@ -3,7 +3,7 @@ import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { getStripe } from "@/lib/stripe";
 import { formatQuantity, isWholeQuantity, parseOrderQuantity } from "@/lib/quantity";
-import { CARD_PROCESSING_FEE_BPS, cardProcessingFeeCents } from "@/lib/cardFee";
+import { CARD_PROCESSING_FEE_BPS, CARD_PROCESSING_FIXED_FEE_CENTS, cardProcessingFeeCents } from "@/lib/cardFee";
 
 export async function POST(request: Request) {
   const stripe = getStripe();
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       customer_name: customerName || null,
       customer_phone: customerPhone || null,
       payment_provider: "stripe",
-      notes: `Card processing fee (${CARD_PROCESSING_FEE_BPS / 100}%): ${cardFeeCents} cents.`,
+      notes: `Card processing fee (${CARD_PROCESSING_FEE_BPS / 100}% + ${CARD_PROCESSING_FIXED_FEE_CENTS}¢): ${cardFeeCents} cents.`,
     })
     .select("*")
     .single();
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
                 currency: "usd" as const,
                 unit_amount: cardFeeCents,
                 product_data: {
-                  name: `Card processing fee (${CARD_PROCESSING_FEE_BPS / 100}%)`,
+                  name: `Card processing fee (${CARD_PROCESSING_FEE_BPS / 100}% + ${CARD_PROCESSING_FIXED_FEE_CENTS}¢)`,
                   description: "Charged for card checkout only. Venmo purchases do not include this fee.",
                 },
               },

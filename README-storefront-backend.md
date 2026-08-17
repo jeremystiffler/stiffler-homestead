@@ -34,7 +34,7 @@ NEXT_PUBLIC_SITE_URL=https://stiffler-homestead.vercel.app
 
 ## Card checkout fee
 
-Stripe Checkout is limited to card payments and adds a separately disclosed **3% card processing fee** to each paid card order. The product page calculates and displays the exact fee for the selected quantity before the customer leaves the storefront, and Stripe Checkout shows it again as its own line item. Venmo takes the manual-payment path and has no card fee.
+Stripe Checkout is limited to card payments and adds a separately disclosed **2.9% + 30¢ card processing fee** to each paid card order. The product page calculates and displays the exact fee for the selected quantity before the customer leaves the storefront, and Stripe Checkout shows it again as its own line item. Venmo takes the manual-payment path and has no card fee.
 
 ## Stripe webhook
 
