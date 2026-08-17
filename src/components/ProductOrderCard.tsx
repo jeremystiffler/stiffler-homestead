@@ -5,6 +5,7 @@ import type { HomesteadProduct } from "@/content/products";
 import { SITE_CONFIG } from "@/lib/config";
 import { isProductOrderable } from "@/lib/products";
 import { formatQuantity, parseOrderQuantity } from "@/lib/quantity";
+import { CARD_PROCESSING_FEE_BPS, cardProcessingFeeCents, formatUsd } from "@/lib/cardFee";
 import SubscribePopup from "@/components/SubscribePopup";
 
 function briefDescription(description: string) {
@@ -26,6 +27,9 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
   const infiniteQuantity = Boolean(product.infiniteQuantity);
   const hasQuantityCap = !infiniteQuantity;
   const max = Math.max(product.availableQuantity, 0);
+  const cardSubtotalCents = Math.round(product.priceCents * quantity);
+  const cardFeeCents = cardProcessingFeeCents(cardSubtotalCents);
+  const cardFeePercent = CARD_PROCESSING_FEE_BPS / 100;
 
   const mailtoHref = useMemo(() => {
     const subject = `Stiffler Homestead order request: ${product.name}`;
@@ -147,13 +151,14 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
           {orderable ? (
             <div className="grid gap-3">
               <button type="button" onClick={purchase} disabled={Boolean(loadingPayment)} className="w-full rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f] disabled:cursor-not-allowed disabled:opacity-60">
-                {loadingPayment === "stripe" ? "Opening secure checkout..." : paidCheckoutReady ? "Pay by card" : "Request purchase"}
+                {loadingPayment === "stripe" ? "Opening secure checkout..." : paidCheckoutReady ? `Pay by card (+${cardFeePercent}% fee)` : "Request purchase"}
               </button>
               {venmoReady && (
                 <button type="button" onClick={payWithVenmo} disabled={Boolean(loadingPayment)} className="w-full rounded-full border-2 border-[#3d95ce] bg-white px-5 py-3 text-center font-black text-[#2675a9] hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-60">
                   {loadingPayment === "venmo" ? "Opening Venmo..." : `Pay with Venmo @${SITE_CONFIG.venmoHandle}`}
                 </button>
               )}
+              {paidCheckoutReady && <p className="text-center text-xs font-semibold leading-5 text-gray-600">Card checkout includes a {cardFeePercent}% processing fee ({formatUsd(cardFeeCents)} for this order). It is shown again as a separate line at secure checkout. Venmo has no card fee.</p>}
               {venmoReady && <p className="text-center text-xs font-semibold leading-5 text-gray-500">Venmo orders stay pending until we confirm payment, then inventory updates.</p>}
             </div>
           ) : (

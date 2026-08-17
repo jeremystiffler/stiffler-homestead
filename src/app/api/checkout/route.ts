@@ -3,6 +3,7 @@ import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { getStripe } from "@/lib/stripe";
 import { formatQuantity, isWholeQuantity, parseOrderQuantity } from "@/lib/quantity";
+import { CARD_PROCESSING_FEE_BPS, cardProcessingFeeCents } from "@/lib/cardFee";
 
 export async function POST(request: Request) {
   const stripe = getStripe();
@@ -34,10 +35,12 @@ export async function POST(request: Request) {
   if (!product.price_cents || product.price_cents <= 0) {
     return NextResponse.json({ error: "This product does not have checkout pricing yet." }, { status: 400 });
   }
-  const totalCents = Math.round(Number(product.price_cents) * quantity);
+  const subtotalCents = Math.round(Number(product.price_cents) * quantity);
+  const cardFeeCents = cardProcessingFeeCents(subtotalCents);
+  const totalCents = subtotalCents + cardFeeCents;
   const quantityLabel = `${formatQuantity(quantity)} ${product.unit_label}`;
   const stripeLineItemQuantity = isWholeQuantity(quantity) ? quantity : 1;
-  const stripeUnitAmount = isWholeQuantity(quantity) ? product.price_cents : totalCents;
+  const stripeUnitAmount = isWholeQuantity(quantity) ? product.price_cents : subtotalCents;
   const stripeProductName = isWholeQuantity(quantity) ? product.name : `${product.name} (${quantityLabel})`;
 
   const { data: order, error: orderError } = await supabase
@@ -52,6 +55,7 @@ export async function POST(request: Request) {
       customer_name: customerName || null,
       customer_phone: customerPhone || null,
       payment_provider: "stripe",
+      notes: `Card processing fee (${CARD_PROCESSING_FEE_BPS / 100}%): ${cardFeeCents} cents.`,
     })
     .select("*")
     .single();
@@ -67,6 +71,7 @@ export async function POST(request: Request) {
   try {
     session = await stripe.checkout.sessions.create({
       mode: "payment",
+      payment_method_types: ["card"],
       customer_email: customerEmail || undefined,
       success_url: `${siteUrl}/products?checkout=success&order=${order.id}`,
       cancel_url: `${siteUrl}/products?checkout=cancelled&order=${order.id}`,
@@ -74,6 +79,9 @@ export async function POST(request: Request) {
         order_id: order.id,
         product_id: product.id,
         quantity: String(quantity),
+        subtotal_cents: String(subtotalCents),
+        card_processing_fee_cents: String(cardFeeCents),
+        total_cents: String(totalCents),
       },
       line_items: [
         {
@@ -87,8 +95,21 @@ export async function POST(request: Request) {
               images: productImage ? [productImage] : undefined,
             },
           },
-        },
-      ],
+          },
+          ...(cardFeeCents > 0
+          ? [{
+              quantity: 1,
+              price_data: {
+                currency: "usd" as const,
+                unit_amount: cardFeeCents,
+                product_data: {
+                  name: `Card processing fee (${CARD_PROCESSING_FEE_BPS / 100}%)`,
+                  description: "Charged for card checkout only. Venmo purchases do not include this fee.",
+                },
+              },
+            }]
+          : []),
+          ],
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Stripe checkout could not be created.";
