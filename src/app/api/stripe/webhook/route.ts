@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const quantity = Number(session.metadata?.quantity || 0);
 
     if (orderId && productId && quantity > 0) {
-      const { data: order } = await supabase.from("homestead_orders").select("status").eq("id", orderId).single();
+      const { data: order } = await supabase.from("homestead_orders").select("status, customer_email, customer_name, customer_phone").eq("id", orderId).single();
       if (order?.status !== "paid") {
         const { data: product } = await supabase
           .from("homestead_products")
@@ -64,6 +64,9 @@ export async function POST(request: Request) {
             status: "paid",
             stripe_payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : null,
             paid_at: new Date().toISOString(),
+            customer_email: session.customer_details?.email || order?.customer_email || null,
+            customer_name: session.customer_details?.name || order?.customer_name || null,
+            customer_phone: session.customer_details?.phone || order?.customer_phone || null,
           })
           .eq("id", orderId);
       }

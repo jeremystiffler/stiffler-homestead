@@ -39,6 +39,7 @@ type OrderRow = {
   customer_phone?: string | null;
   payment_provider: string;
   paid_at?: string | null;
+  picked_up_at?: string | null;
   created_at: string;
   notes?: string | null;
   product?: { name?: string; slug?: string } | null;
@@ -336,7 +337,7 @@ export default function ProductAdmin() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to update order.");
-      setMessage(action === "mark_paid" ? "Order marked paid and inventory reduced." : "Order updated.");
+      setMessage(action === "mark_paid" ? "Order marked paid and inventory reduced." : action === "mark_picked_up" ? "Pickup marked complete." : "Order updated.");
       await Promise.all([loadOrders(), loadProducts()]);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to update order.");
@@ -597,8 +598,8 @@ export default function ProductAdmin() {
         <div className="rounded-3xl bg-white p-5 shadow-lg shadow-green-900/5 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.2em] text-[#2f7d4b]">Manual payment orders</p>
-              <h2 className="text-2xl font-black text-[#183b25]">Mark PayPal/Venmo orders paid to reduce inventory</h2>
+              <p className="text-sm font-black uppercase tracking-[0.2em] text-[#2f7d4b]">Customer orders & pickup</p>
+              <h2 className="text-2xl font-black text-[#183b25]">Contact customers and mark paid orders picked up</h2>
             </div>
             <button type="button" onClick={loadOrders} disabled={loading} className="rounded-full bg-amber-300 px-4 py-3 font-black text-[#183b25] disabled:opacity-60">Refresh orders</button>
           </div>
@@ -611,11 +612,13 @@ export default function ProductAdmin() {
                     <p className="font-black text-[#183b25]">{order.product?.name || "Product"} × {formatQuantity(Number(order.quantity || 0))}</p>
                     <p className="mt-1 text-sm text-gray-600">{order.payment_provider.toUpperCase()} • {formatMoney(order.total_cents)} • {order.status}</p>
                     <p className="mt-1 text-xs text-gray-500">{new Date(order.created_at).toLocaleString()}</p>
-                    {(order.customer_name || order.customer_email || order.customer_phone) && <p className="mt-2 text-sm text-gray-700">{[order.customer_name, order.customer_email, order.customer_phone].filter(Boolean).join(" • ")}</p>}
+                    {(order.customer_name || order.customer_email || order.customer_phone) && <p className="mt-2 text-sm text-gray-700"><span className="font-black text-[#183b25]">Customer:</span> {[order.customer_name, order.customer_email, order.customer_phone].filter(Boolean).join(" • ")}</p>}
+                    {order.status === "paid" && <p className={`mt-2 text-sm font-black ${order.picked_up_at ? "text-green-700" : "text-amber-700"}`}>{order.picked_up_at ? `✓ Picked up ${new Date(order.picked_up_at).toLocaleString()}` : "Pickup not completed"}</p>}
                     {order.notes && <p className="mt-2 rounded-xl bg-[#f7f3ea] p-2 text-xs text-gray-600">{order.notes}</p>}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {order.status !== "paid" && <button type="button" onClick={() => updateOrder(order.id, "mark_paid")} disabled={loading} className="rounded-full bg-[#2f7d4b] px-4 py-2 text-sm font-black text-white disabled:opacity-60">Mark paid</button>}
+                    {order.status === "paid" && <label className="flex items-center gap-2 rounded-full border border-green-900/20 px-3 py-2 text-sm font-black text-[#183b25]"><input type="checkbox" checked={Boolean(order.picked_up_at)} disabled={loading} onChange={(event) => updateOrder(order.id, event.target.checked ? "mark_picked_up" : "mark_not_picked_up")} /> Complete pickup</label>}
                     {order.status === "pending" && <button type="button" onClick={() => updateOrder(order.id, "cancelled")} disabled={loading} className="rounded-full border border-red-300 px-4 py-2 text-sm font-black text-red-700 disabled:opacity-60">Cancel</button>}
                   </div>
                 </div>

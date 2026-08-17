@@ -73,6 +73,9 @@ export async function POST(request: Request) {
       mode: "payment",
       payment_method_types: ["card"],
       customer_email: customerEmail || undefined,
+      // Checkout always collects email; require a phone number too so paid
+      // local-pickup orders have a reliable contact method in admin.
+      phone_number_collection: { enabled: true },
       success_url: `${siteUrl}/products?checkout=success&order=${order.id}`,
       cancel_url: `${siteUrl}/products?checkout=cancelled&order=${order.id}`,
       metadata: {

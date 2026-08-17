@@ -82,6 +82,29 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ order: updated });
   }
 
+  if (action === "mark_picked_up") {
+    if (order.status !== "paid") return NextResponse.json({ error: "Only paid orders can be marked picked up." }, { status: 409 });
+    const { data: updated, error: updateError } = await supabase
+      .from("homestead_orders")
+      .update({ picked_up_at: new Date().toISOString() })
+      .eq("id", orderId)
+      .select("*")
+      .single();
+    if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+    return NextResponse.json({ order: updated });
+  }
+
+  if (action === "mark_not_picked_up") {
+    const { data: updated, error: updateError } = await supabase
+      .from("homestead_orders")
+      .update({ picked_up_at: null })
+      .eq("id", orderId)
+      .select("*")
+      .single();
+    if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+    return NextResponse.json({ order: updated });
+  }
+
   if (["cancelled", "refunded"].includes(action)) {
     const { data: updated, error: updateError } = await supabase
       .from("homestead_orders")
