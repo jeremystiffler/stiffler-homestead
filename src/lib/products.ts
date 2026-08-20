@@ -1,6 +1,7 @@
 import { PRODUCTS, type HomesteadProduct } from "@/content/products";
 import { SITE_CONFIG } from "@/lib/config";
 import { isInfiniteQuantityProduct, stripInfiniteQuantityMarker } from "@/lib/inventory";
+import { allowsHalfOrders, stripHalfOrdersMarker } from "@/lib/halfOrders";
 import { formatPrice } from "@/lib/money";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
@@ -15,6 +16,7 @@ type ProductRow = {
   unit_label: string;
   available_quantity: number;
   infinite_quantity?: boolean | null;
+  allow_half_orders?: boolean | null;
   status: HomesteadProduct["status"];
   availability_window: string;
   pickup_note: string;
@@ -51,10 +53,11 @@ export function rowToProduct(row: ProductRow): HomesteadProduct {
     description: row.description,
     priceCents: row.price_cents || 0,
     priceLabel: productPriceLabel(row.price_cents),
-    priceNote: stripInfiniteQuantityMarker(row.price_note) || undefined,
+    priceNote: stripHalfOrdersMarker(stripInfiniteQuantityMarker(row.price_note)) || undefined,
     unitLabel: row.unit_label,
     availableQuantity: row.available_quantity,
     infiniteQuantity,
+    allowHalfOrders: allowsHalfOrders(row),
     status: !infiniteQuantity && row.available_quantity <= 0 && (status === "available" || status === "preorder") ? "sold_out" : status,
     availabilityWindow: row.availability_window,
     pickupNote: row.pickup_note,

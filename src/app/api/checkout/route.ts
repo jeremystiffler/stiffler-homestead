@@ -3,6 +3,7 @@ import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { getStripe } from "@/lib/stripe";
 import { formatQuantity, isWholeQuantity, parseOrderQuantity } from "@/lib/quantity";
+import { isAllowedOrderQuantity } from "@/lib/halfOrders";
 import { CARD_PROCESSING_FEE_BPS, CARD_PROCESSING_FIXED_FEE_CENTS, cardProcessingFeeCents } from "@/lib/cardFee";
 
 export async function POST(request: Request) {
@@ -27,6 +28,9 @@ export async function POST(request: Request) {
   if (productError) return NextResponse.json({ error: productError.message }, { status: 500 });
   const product = products?.[0];
   if (!product) return NextResponse.json({ error: "Product not found." }, { status: 404 });
+  if (!isAllowedOrderQuantity(product, quantity)) {
+    return NextResponse.json({ error: "This product is sold whole only." }, { status: 400 });
+  }
   const infiniteQuantity = isInfiniteQuantityProduct(product);
   const status = infiniteQuantity && product.status === "sold_out" ? "available" : product.status;
   if (!["available", "preorder"].includes(status) || (!infiniteQuantity && product.available_quantity < quantity)) {

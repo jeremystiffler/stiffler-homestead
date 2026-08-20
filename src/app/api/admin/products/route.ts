@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthorized } from "@/lib/adminAuth";
 import { isInfiniteQuantityProduct, stripInfiniteQuantityMarker, withInfiniteQuantityMarker } from "@/lib/inventory";
+import { allowsHalfOrders, stripHalfOrdersMarker, withHalfOrdersMarker } from "@/lib/halfOrders";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +36,8 @@ export async function GET(request: Request) {
   const products = (data || []).map((product) => ({
     ...product,
     infinite_quantity: isInfiniteQuantityProduct(product),
-    price_note: stripInfiniteQuantityMarker(product.price_note),
+    allow_half_orders: allowsHalfOrders(product),
+    price_note: stripHalfOrdersMarker(stripInfiniteQuantityMarker(product.price_note)),
   }));
   return jsonNoStore({ products });
 }
@@ -68,6 +70,7 @@ export async function POST(request: Request) {
   if (!name) return jsonNoStore({ error: "Choose a product or enter a product name before saving." }, { status: 400 });
 
   const requestedInfiniteQuantity = toBoolean(body.infinite_quantity ?? body.infiniteQuantity ?? isInfiniteQuantityProduct(existingProduct || {}));
+  const requestedAllowHalfOrders = toBoolean(body.allow_half_orders ?? body.allowHalfOrders ?? existingProduct?.allow_half_orders ?? false);
   const status = String(body.status ?? existingProduct?.status ?? "coming_soon");
   const baseRow: Record<string, unknown> = {
     slug: String(body.slug ?? existingProduct?.slug ?? slugify(name)),
@@ -75,10 +78,11 @@ export async function POST(request: Request) {
     category: body.category ?? existingProduct?.category ?? "Meat chickens",
     description: body.description ?? existingProduct?.description ?? "",
     price_cents: Math.max(0, Number(body.price_cents ?? existingProduct?.price_cents ?? 0)),
-    price_note: withInfiniteQuantityMarker(body.price_note ?? existingProduct?.price_note ?? null, requestedInfiniteQuantity),
+    price_note: withHalfOrdersMarker(withInfiniteQuantityMarker(body.price_note ?? existingProduct?.price_note ?? null, requestedInfiniteQuantity), requestedAllowHalfOrders),
     unit_label: String(body.unit_label ?? existingProduct?.unit_label ?? "").trim() || "items",
     available_quantity: Math.max(0, Number(body.available_quantity ?? existingProduct?.available_quantity ?? 0)),
     infinite_quantity: requestedInfiniteQuantity,
+    allow_half_orders: requestedAllowHalfOrders,
     status,
     availability_window: body.availability_window ?? existingProduct?.availability_window ?? "Update availability",
     pickup_note: body.pickup_note ?? existingProduct?.pickup_note ?? "Local pickup details will be confirmed after purchase.",
@@ -108,13 +112,14 @@ export async function POST(request: Request) {
 
   let { data: savedProduct, error: saveError } = await saveProductRow(baseRow);
 
-  // If Supabase rejects a column because the production schema/schema cache does not
-  // have it yet, retry without newer columns. Infinite quantity is still persisted
-  // through the price_note marker fallback until the DB migration is applied.
+  // If Supabase rejects optional payment columns because its schema cache is stale,
+  // retry without those columns. The half-order setting is never dropped: it must
+  // persist before an admin save can succeed.
   if (saveError && /column|schema cache/i.test(saveError.message || "")) {
     const fallbackRow = { ...baseRow };
     for (const column of optionalColumns) delete fallbackRow[column];
     delete fallbackRow.infinite_quantity;
+    delete fallbackRow.allow_half_orders;
     const fallbackResult = await saveProductRow(fallbackRow);
     savedProduct = fallbackResult.data;
     saveError = fallbackResult.error;
@@ -137,7 +142,8 @@ export async function POST(request: Request) {
   const normalizedReadback = {
     ...readback,
     infinite_quantity: isInfiniteQuantityProduct(readback),
-    price_note: stripInfiniteQuantityMarker(readback.price_note),
+    allow_half_orders: allowsHalfOrders(readback),
+    price_note: stripHalfOrdersMarker(stripInfiniteQuantityMarker(readback.price_note)),
   };
 
   if (Boolean(normalizedReadback.infinite_quantity) !== requestedInfiniteQuantity) {
@@ -147,6 +153,9 @@ export async function POST(request: Request) {
       requestedInfiniteQuantity,
       persistedInfiniteQuantity: Boolean(normalizedReadback.infinite_quantity),
     }, { status: 500 });
+  }
+  if (Boolean(normalizedReadback.allow_half_orders) !== requestedAllowHalfOrders) {
+    return jsonNoStore({ error: "Product saved, but DB readback shows half-order eligibility did not persist.", product: normalizedReadback }, { status: 500 });
   }
 
   return jsonNoStore({ product: normalizedReadback });

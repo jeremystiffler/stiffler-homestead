@@ -14,6 +14,7 @@ create table if not exists public.homestead_products (
   unit_label text not null default 'items',
   available_quantity numeric(10,2) not null default 0 check (available_quantity >= 0),
   infinite_quantity boolean not null default false,
+  allow_half_orders boolean not null default false,
   status text not null default 'coming_soon' check (status in ('available', 'preorder', 'sold_out', 'coming_soon', 'hidden')),
   availability_window text not null default 'Update availability',
   pickup_note text not null default 'Local pickup details will be confirmed after purchase.',
@@ -102,6 +103,9 @@ using (true);
 
 alter table public.homestead_products
 add column if not exists infinite_quantity boolean not null default false;
+
+alter table public.homestead_products
+add column if not exists allow_half_orders boolean not null default false;
 
 alter table public.homestead_products
 alter column available_quantity type numeric(10,2) using available_quantity::numeric;

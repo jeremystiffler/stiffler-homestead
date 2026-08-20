@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { isInfiniteQuantityProduct, stripInfiniteQuantityMarker } from "@/lib/inventory";
+import { allowsHalfOrders, stripHalfOrdersMarker } from "@/lib/halfOrders";
 import { formatQuantity } from "@/lib/quantity";
 
 type ProductRow = {
@@ -15,6 +16,7 @@ type ProductRow = {
   unit_label: string;
   available_quantity: number;
   infinite_quantity?: boolean;
+  allow_half_orders?: boolean;
   status: string;
   availability_window: string;
   pickup_note: string;
@@ -55,6 +57,7 @@ const blankProduct: ProductRow = {
   unit_label: "items",
   available_quantity: 0,
   infinite_quantity: false,
+  allow_half_orders: false,
   status: "coming_soon",
   availability_window: "Update availability",
   pickup_note: "Local pickup near Lexington, KY. Pickup details will be confirmed after purchase.",
@@ -72,7 +75,8 @@ function normalizeProduct(product: ProductRow): ProductRow {
   return {
     ...product,
     infinite_quantity: Boolean(product.infinite_quantity),
-    price_note: stripInfiniteQuantityMarker(product.price_note),
+    allow_half_orders: allowsHalfOrders(product),
+    price_note: stripHalfOrdersMarker(stripInfiniteQuantityMarker(product.price_note)),
   };
 }
 
@@ -263,7 +267,7 @@ export default function ProductAdmin() {
         const detail = [data.error, data.details, data.hint].filter(Boolean).join(" — ");
         throw new Error(detail || `Unable to save product. Server returned ${response.status}.`);
       }
-      const savedProduct = normalizeProduct({ ...normalized, ...(data.product || {}), infinite_quantity: data.product?.infinite_quantity ?? normalized.infinite_quantity });
+      const savedProduct = normalizeProduct({ ...normalized, ...(data.product || {}), infinite_quantity: data.product?.infinite_quantity ?? normalized.infinite_quantity, allow_half_orders: data.product?.allow_half_orders ?? normalized.allow_half_orders });
       setSelected(savedProduct);
       setProducts((currentProducts) => {
         const existingIndex = currentProducts.findIndex((product) => product.id ? product.id === savedProduct.id : product.slug === savedProduct.slug);
@@ -276,7 +280,7 @@ export default function ProductAdmin() {
         const savedAt = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
         setSaveStatus("saved");
         setLastSavedAt(savedAt);
-        setMessage(`✅ Saved correctly at ${savedAt}. Database confirmed infinite quantity is ${savedProduct.infinite_quantity ? "ON" : "OFF"}.`);
+        setMessage(`✅ Saved correctly at ${savedAt}. Database confirmed half orders are ${savedProduct.allow_half_orders ? "ON" : "OFF"}.`);
       }
       await loadProducts(false);
     } catch (error) {
@@ -516,6 +520,13 @@ export default function ProductAdmin() {
                 <span>
                   Infinite quantity
                   <span className="mt-1 block text-xs font-semibold leading-5 text-gray-600">Turn this on when inventory should not count down after orders.</span>
+                </span>
+              </label>
+              <label className="flex items-start gap-3 rounded-2xl bg-white p-4 text-sm font-black text-[#183b25] md:min-w-64">
+                <input type="checkbox" checked={Boolean(selected.allow_half_orders)} onChange={(event) => update("allow_half_orders", event.target.checked)} className="mt-1" />
+                <span>
+                  Allow half-animal orders
+                  <span className="mt-1 block text-xs font-semibold leading-5 text-gray-600">Off by default. Turn on only when customers may order 0.5 of this product.</span>
                 </span>
               </label>
             </div>

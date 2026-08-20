@@ -13,6 +13,7 @@ export interface HomesteadProduct {
   unitLabel: string;
   availableQuantity: number;
   infiniteQuantity?: boolean;
+  allowHalfOrders?: boolean;
   status: ProductStatus;
   availabilityWindow: string;
   pickupNote: string;

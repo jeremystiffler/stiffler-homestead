@@ -5,6 +5,7 @@ import type { HomesteadProduct } from "@/content/products";
 import { SITE_CONFIG } from "@/lib/config";
 import { isProductOrderable } from "@/lib/products";
 import { formatQuantity, parseOrderQuantity } from "@/lib/quantity";
+import { allowsHalfOrders } from "@/lib/halfOrders";
 import { cardProcessingFeeCents, formatUsd } from "@/lib/cardFee";
 import SubscribePopup from "@/components/SubscribePopup";
 
@@ -26,6 +27,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
   const [error, setError] = useState("");
   const infiniteQuantity = Boolean(product.infiniteQuantity);
   const hasQuantityCap = !infiniteQuantity;
+  const allowHalfOrders = allowsHalfOrders(product);
   const max = Math.max(product.availableQuantity, 0);
   const cardSubtotalCents = Math.round(product.priceCents * quantity);
   const cardFeeCents = cardProcessingFeeCents(cardSubtotalCents);
@@ -131,12 +133,13 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                 aria-label={`Quantity for ${product.name}`}
                 type="number"
                 inputMode="decimal"
-                min={0.5}
-                step={0.5}
+                min={1}
+                step={allowHalfOrders ? 0.5 : 1}
                 max={hasQuantityCap ? max : undefined}
                 value={quantity}
                 onChange={(event) => {
-                  const next = parseOrderQuantity(event.target.value, quantity || 1);
+                  const parsed = parseOrderQuantity(event.target.value, quantity || 1);
+                  const next = allowHalfOrders ? parsed : Math.max(1, Math.round(parsed));
                   setQuantity(hasQuantityCap ? Math.min(next, max) : next);
                 }}
                 className="w-24 rounded-xl border border-green-900/20 bg-white px-3 py-2 text-center text-lg font-black text-[#183b25] outline-none focus:border-[#2f7d4b]"

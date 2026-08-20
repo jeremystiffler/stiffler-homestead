@@ -3,6 +3,7 @@ import { SITE_CONFIG } from "@/lib/config";
 import { isInfiniteQuantityProduct } from "@/lib/inventory";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { formatQuantity, parseOrderQuantity } from "@/lib/quantity";
+import { isAllowedOrderQuantity } from "@/lib/halfOrders";
 
 function buildVenmoPaymentUrl(baseUrl: string, amountCents: number, note: string) {
   const cleaned = baseUrl.trim();
@@ -38,6 +39,9 @@ export async function POST(request: Request) {
   if (productError) return NextResponse.json({ error: productError.message }, { status: 500 });
   const product = products?.[0];
   if (!product) return NextResponse.json({ error: "Product not found." }, { status: 404 });
+  if (!isAllowedOrderQuantity(product, quantity)) {
+    return NextResponse.json({ error: "This product is sold whole only." }, { status: 400 });
+  }
   const infiniteQuantity = isInfiniteQuantityProduct(product);
   const status = infiniteQuantity && product.status === "sold_out" ? "available" : product.status;
   if (!["available", "preorder"].includes(status) || (!infiniteQuantity && product.available_quantity < quantity)) {
