@@ -29,6 +29,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
   const hasQuantityCap = !infiniteQuantity;
   const allowHalfOrders = allowsHalfOrders(product);
   const max = Math.max(product.availableQuantity, 0);
+  const quantityStep = allowHalfOrders ? 0.5 : 1;
   const cardSubtotalCents = Math.round(product.priceCents * quantity);
   const cardFeeCents = cardProcessingFeeCents(cardSubtotalCents);
 
@@ -49,6 +50,11 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
 
     return `mailto:${SITE_CONFIG.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }, [product.name, product.unitLabel, quantity]);
+
+  function adjustQuantity(direction: -1 | 1) {
+    const next = Math.max(1, quantity + direction * quantityStep);
+    setQuantity(hasQuantityCap ? Math.min(next, max) : next);
+  }
 
   async function purchase() {
     if (!paidCheckoutReady) {
@@ -128,13 +134,23 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
               </p>
             </div>
             {orderable && (
+              <div className="flex w-full items-center justify-between gap-3 sm:w-auto">
+              <button
+                type="button"
+                onClick={() => adjustQuantity(-1)}
+                disabled={quantity <= 1}
+                className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-green-900/20 bg-white text-2xl font-black text-[#183b25] disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label={`Decrease quantity for ${product.name}`}
+              >
+                −
+              </button>
               <input
                 id={`quantity-${product.slug}`}
                 aria-label={`Quantity for ${product.name}`}
                 type="number"
                 inputMode="decimal"
                 min={1}
-                step={allowHalfOrders ? 0.5 : 1}
+                step={quantityStep}
                 max={hasQuantityCap ? max : undefined}
                 value={quantity}
                 onChange={(event) => {
@@ -142,8 +158,18 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
                   const next = allowHalfOrders ? parsed : Math.max(1, Math.round(parsed));
                   setQuantity(hasQuantityCap ? Math.min(next, max) : next);
                 }}
-                className="w-24 rounded-xl border border-green-900/20 bg-white px-3 py-2 text-center text-lg font-black text-[#183b25] outline-none focus:border-[#2f7d4b]"
+                className="h-12 min-w-0 flex-1 rounded-xl border border-green-900/20 bg-white px-2 py-2 text-center text-lg font-black text-[#183b25] outline-none focus:border-[#2f7d4b] focus:ring-4 focus:ring-green-100 sm:w-24"
               />
+              <button
+                type="button"
+                onClick={() => adjustQuantity(1)}
+                disabled={hasQuantityCap && quantity >= max}
+                className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#2f7d4b] text-2xl font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label={`Increase quantity for ${product.name}`}
+              >
+                +
+              </button>
+              </div>
             )}
           </div>
           {orderable && infiniteQuantity && <p className="mt-3 text-xs font-semibold leading-5 text-gray-600">No inventory cap is applied to this item — choose however many you want for local pickup.</p>}

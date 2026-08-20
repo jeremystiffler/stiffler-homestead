@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Analytics } from "@vercel/analytics/next";
 import OutboundClickTracker from "@/components/OutboundClickTracker";
 import SubscribePopup from "@/components/SubscribePopup";
+import MobileNavigation from "@/components/MobileNavigation";
 import { SITE_CONFIG } from "@/lib/config";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -49,8 +50,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="sticky top-0 z-50 border-b border-green-900/10 bg-[#fffaf0]/85 shadow-sm backdrop-blur-xl">
-          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-amber-300 focus:px-4 focus:py-3 focus:font-black focus:text-[#183b25]">Skip to content</a>
+        <nav className="sticky top-0 z-50 border-b border-green-900/10 bg-[#fffaf0]/95 shadow-sm backdrop-blur-xl">
+          <MobileNavigation />
+          <div className="mx-auto hidden max-w-6xl items-center justify-between gap-4 px-4 py-3 md:flex">
             <Link href="/" className="group flex min-w-0 items-center gap-3 font-black text-[#183b25]">
               <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-amber-300 via-lime-200 to-[#2f7d4b] text-xl shadow-lg shadow-green-900/10 ring-2 ring-white transition group-hover:-rotate-3 group-hover:scale-105" aria-hidden="true">
                 🐓
@@ -70,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </nav>
         <SubscribePopup floating label="Subscribe" />
-        <main className="min-h-screen">{children}</main>
+        <main id="main-content" className="min-h-screen">{children}</main>
         <footer className="bg-[#183b25] py-10 text-sm text-white/75">
           <div className="mx-auto grid max-w-6xl gap-5 px-4 md:grid-cols-[1fr_auto] md:items-center">
             <div>
