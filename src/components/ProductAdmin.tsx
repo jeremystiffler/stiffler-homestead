@@ -139,6 +139,28 @@ function formatMoney(cents: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 }
 
+function publicProductUrl(slug: string) {
+  return `https://stifflerhomestead.store/products#${encodeURIComponent(slug)}`;
+}
+
+async function copyText(text: string) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textarea);
+  if (!copied) throw new Error("Your browser did not allow the URL to be copied.");
+}
+
 async function resizeImage(file: File) {
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -189,6 +211,8 @@ export default function ProductAdmin() {
   const [message, setMessage] = useState("");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastSavedAt, setLastSavedAt] = useState("");
+  const [directUrl, setDirectUrl] = useState("");
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [loading, setLoading] = useState(false);
   const [dragSlug, setDragSlug] = useState("");
 
@@ -236,6 +260,8 @@ export default function ProductAdmin() {
     if (!quiet) {
       setSaveStatus("saving");
       setLastSavedAt("");
+      setDirectUrl("");
+      setCopyStatus("idle");
       setMessage("Saving product…");
     }
     try {
@@ -280,6 +306,7 @@ export default function ProductAdmin() {
         const savedAt = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
         setSaveStatus("saved");
         setLastSavedAt(savedAt);
+        setDirectUrl(publicProductUrl(savedProduct.slug));
         setMessage(`✅ Saved correctly at ${savedAt}. Database confirmed half orders are ${savedProduct.allow_half_orders ? "ON" : "OFF"}.`);
       }
       await loadProducts(false);
@@ -288,6 +315,17 @@ export default function ProductAdmin() {
       setMessage(error instanceof Error ? `❌ Save failed: ${error.message}` : "❌ Save failed: Unable to save product.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function copyDirectUrl() {
+    if (!directUrl) return;
+    try {
+      await copyText(directUrl);
+      setCopyStatus("copied");
+    } catch (error) {
+      setCopyStatus("error");
+      setMessage(error instanceof Error ? `❌ Could not copy direct URL: ${error.message}` : "❌ Could not copy direct URL.");
     }
   }
 
@@ -593,6 +631,15 @@ export default function ProductAdmin() {
               <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-black text-green-900 ring-2 ring-green-300">
                 DB confirmed at {lastSavedAt}
               </span>
+            )}
+            {directUrl && saveStatus === "saved" && (
+              <div className="flex w-full flex-wrap items-center gap-2 rounded-2xl border border-green-300 bg-green-50 p-3 sm:w-auto" role="status">
+                <span className="text-sm font-black text-green-950">Public product URL</span>
+                <input aria-label="Public product URL" readOnly value={directUrl} className="min-w-0 flex-1 rounded-lg border border-green-900/15 bg-white px-3 py-2 text-sm text-green-950 sm:w-80" onFocus={(event) => event.currentTarget.select()} />
+                <button type="button" onClick={copyDirectUrl} className={`rounded-full px-4 py-2 text-sm font-black text-white ${copyStatus === "copied" ? "bg-green-700" : copyStatus === "error" ? "bg-red-700" : "bg-[#2f7d4b]"}`}>
+                  {copyStatus === "copied" ? "✓ Copied!" : copyStatus === "error" ? "Copy failed — try again" : "Copy direct URL"}
+                </button>
+              </div>
             )}
             <button type="button" onClick={() => toggleHidden(selected)} disabled={loading || (!selected.id && !selected.name)} className="rounded-full border-2 border-amber-400 px-6 py-3 font-black text-amber-900 disabled:opacity-60">
               {selected.status === "hidden" ? "Unhide product" : "Hide from public view"}
