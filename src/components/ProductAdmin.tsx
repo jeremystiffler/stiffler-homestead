@@ -672,6 +672,7 @@ export default function ProductAdmin() {
                     <p className="mt-1 text-xs text-gray-500">{new Date(order.created_at).toLocaleString()}</p>
                     <p className="mt-2 text-sm text-gray-700"><span className="font-black text-[#183b25]">Person paying:</span> {order.customer_name || "Name not provided"}</p>
                     {(order.customer_email || order.customer_phone) && <p className="mt-1 text-sm text-gray-700"><span className="font-black text-[#183b25]">Contact:</span> {[order.customer_email, order.customer_phone].filter(Boolean).join(" • ")}</p>}
+                    {order.payment_provider === "venmo" && !order.customer_email && !order.customer_phone && <p className="mt-1 text-sm font-bold text-amber-700">No contact details saved for this older Venmo order.</p>}
                     {order.status === "paid" && <p className={`mt-2 text-sm font-black ${order.picked_up_at ? "text-green-700" : "text-amber-700"}`}>{order.picked_up_at ? `✓ Picked up ${new Date(order.picked_up_at).toLocaleString()}` : "Pickup not completed"}</p>}
                     {order.notes && <p className="mt-2 rounded-xl bg-[#f7f3ea] p-2 text-xs text-gray-600">{order.notes}</p>}
                   </div>

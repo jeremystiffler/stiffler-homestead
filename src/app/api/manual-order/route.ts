@@ -31,6 +31,11 @@ export async function POST(request: Request) {
   const customerName = String(body.customerName || "").trim();
   const customerPhone = String(body.customerPhone || "").trim();
   if (!customerName || customerName.length > 120) return NextResponse.json({ error: "Enter the name of the person paying (up to 120 characters)." }, { status: 400 });
+  if ((!customerEmail && !customerPhone) || customerEmail.length > 254 || customerPhone.length > 30 ||
+    (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) ||
+    (customerPhone && customerPhone.replace(/\D/g, "").length < 10)) {
+    return NextResponse.json({ error: "Enter a valid email address or phone number for pickup (at least one is required)." }, { status: 400 });
+  }
 
   const query = supabase.from("homestead_products").select("*").limit(1);
   const { data: products, error: productError } = productId
