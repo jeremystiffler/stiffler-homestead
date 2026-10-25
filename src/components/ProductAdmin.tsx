@@ -670,7 +670,8 @@ export default function ProductAdmin() {
                     <p className="font-black text-[#183b25]">{order.product?.name || "Product"} × {formatQuantity(Number(order.quantity || 0))}</p>
                     <p className="mt-1 text-sm text-gray-600">{order.payment_provider.toUpperCase()} • {formatMoney(order.total_cents)} • {order.status}</p>
                     <p className="mt-1 text-xs text-gray-500">{new Date(order.created_at).toLocaleString()}</p>
-                    {(order.customer_name || order.customer_email || order.customer_phone) && <p className="mt-2 text-sm text-gray-700"><span className="font-black text-[#183b25]">Customer:</span> {[order.customer_name, order.customer_email, order.customer_phone].filter(Boolean).join(" • ")}</p>}
+                    <p className="mt-2 text-sm text-gray-700"><span className="font-black text-[#183b25]">Person paying:</span> {order.customer_name || "Name not provided"}</p>
+                    {(order.customer_email || order.customer_phone) && <p className="mt-1 text-sm text-gray-700"><span className="font-black text-[#183b25]">Contact:</span> {[order.customer_email, order.customer_phone].filter(Boolean).join(" • ")}</p>}
                     {order.status === "paid" && <p className={`mt-2 text-sm font-black ${order.picked_up_at ? "text-green-700" : "text-amber-700"}`}>{order.picked_up_at ? `✓ Picked up ${new Date(order.picked_up_at).toLocaleString()}` : "Pickup not completed"}</p>}
                     {order.notes && <p className="mt-2 rounded-xl bg-[#f7f3ea] p-2 text-xs text-gray-600">{order.notes}</p>}
                   </div>

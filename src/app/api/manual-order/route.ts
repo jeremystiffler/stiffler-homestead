@@ -30,6 +30,7 @@ export async function POST(request: Request) {
   const customerEmail = String(body.customerEmail || "").trim();
   const customerName = String(body.customerName || "").trim();
   const customerPhone = String(body.customerPhone || "").trim();
+  if (!customerName || customerName.length > 120) return NextResponse.json({ error: "Enter the name of the person paying (up to 120 characters)." }, { status: 400 });
 
   const query = supabase.from("homestead_products").select("*").limit(1);
   const { data: products, error: productError } = productId

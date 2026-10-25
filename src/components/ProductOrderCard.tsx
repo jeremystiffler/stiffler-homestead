@@ -23,6 +23,7 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
   const defaultVenmoUrl = SITE_CONFIG.venmoHandle ? `https://venmo.com/${SITE_CONFIG.venmoHandle}` : "";
   const venmoReady = paidCheckoutReady && Boolean(product.venmoUrl || defaultVenmoUrl);
   const [quantity, setQuantity] = useState(orderable ? 1 : 0);
+  const [customerName, setCustomerName] = useState("");
   const [loadingPayment, setLoadingPayment] = useState<"stripe" | "venmo" | null>(null);
   const [error, setError] = useState("");
   const infiniteQuantity = Boolean(product.infiniteQuantity);
@@ -62,13 +63,17 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
       return;
     }
 
+    if (!customerName.trim()) {
+      setError("Enter the name of the person paying before checkout.");
+      return;
+    }
     setError("");
     setLoadingPayment("stripe");
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product.id, slug: product.slug, quantity }),
+        body: JSON.stringify({ productId: product.id, slug: product.slug, quantity, customerName: customerName.trim() }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Checkout could not be started.");
@@ -82,13 +87,17 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
   async function payWithVenmo() {
     if (!venmoReady) return;
 
+    if (!customerName.trim()) {
+      setError("Enter the name of the person paying before checkout.");
+      return;
+    }
     setError("");
     setLoadingPayment("venmo");
     try {
       const response = await fetch("/api/manual-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider: "venmo", productId: product.id, slug: product.slug, quantity }),
+        body: JSON.stringify({ provider: "venmo", productId: product.id, slug: product.slug, quantity, customerName: customerName.trim() }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Venmo payment could not be started.");
@@ -178,6 +187,10 @@ export default function ProductOrderCard({ product }: { product: HomesteadProduc
         <div className="mt-5">
           {orderable ? (
             <div className="grid gap-3">
+              {paidCheckoutReady && <label className="grid gap-2 text-sm font-bold text-[#183b25]">
+                Name of person paying
+                <input type="text" autoComplete="name" required maxLength={120} value={customerName} onChange={(event) => setCustomerName(event.target.value)} placeholder="Full name" className="rounded-xl border border-green-900/20 bg-white px-4 py-3 font-medium outline-none focus:border-[#2f7d4b] focus:ring-4 focus:ring-green-100" />
+              </label>}
               <button type="button" onClick={purchase} disabled={Boolean(loadingPayment)} className="w-full rounded-full bg-[#2f7d4b] px-5 py-3 text-center font-black text-white hover:bg-[#27683f] disabled:cursor-not-allowed disabled:opacity-60">
                 {loadingPayment === "stripe" ? "Opening secure checkout..." : paidCheckoutReady ? "Pay by card (+2.9% + 30¢ fee)" : "Request purchase"}
               </button>
